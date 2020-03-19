@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+
+  <%- include ('./partials/head') %>
+  <title>Covid19 Sentiment Analysis</title>
+  <style>
+    .section {
+      box-shadow: 0px 3px 5px 2px #888888;
+      padding: 10px;
+      display: inline-block;
+      margin: 30px;
+    }
+    .label {
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      margin: 10px 30px;
+    }
+    .bigNumber {
+      font-family: "Open Sans", sans-serif;
+      font-size: 3em;
+    }
+    .chart{
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <%- include ('./partials/header') %>
+  <div id = "overall" class = "section">
+    <h1 class = "label">Overall Sentiment</h1>
+    <div id='overallSentiment' class = "chart"></div>
+    <div class = "chart">
+      0.7
+    </div>
+  </div>
+  <div id = "breakdownSentiment" class = "section">
+    <div id='breakdown' class = "chart"></div>
+
+  </div>
+  <script>
+    console.log("<%= data.overall %>")
+    const overallConfig = {
+      type: 'gauge',
+      "plotarea":{
+        "y": 60
+   },
+      scale: {
+        'size-factor': 1.4
+      },
+      'scale-r': {
+        aperture: 200,
+        values: "0:1:0.1",
+        center: {
+          visible: false
+        },
+        ring: {
+          size: 10,
+          rules: [
+            {
+              rule: "%v >= 0 && %v <= 0.4",
+              'background-color': "orangered"
+            }, {
+              rule: "%v >= 0.4 && %v <= 0.6",
+              'background-color': "gold"
+            }, {
+              rule: "%v >= 0.6 && %v <= 1.0",
+              'background-color': 'green'
+            }
+          ]
+        }
+      },
+      plot: {
+        csize: "5%",
+        size: "80%",
+        'background-color': "#000000",
+        'value-box': { //Value Boxes
+          placement: "center",  //Specify placement at "center", "tip", or "edge".
+          visible: false,
+          text: "%v",
+          fontSize: 25,
+          'font-color': "black",
+          rules: [
+            {
+              rule: "%v < 0.4",
+              text: "%v<br>Negative",
+              'font-color': 'orangered'
+            }, {
+              rule: "%v >= 0.4 && %v <= 0.6",
+              text: "%v<br>Neutral",
+              'font-color': 'gold'
+            },{
+              rule: "%v > 0.6",
+              text: "%v<br>Positive",
+              'font-color': 'green'
+            },
+          ]
+        }
+      },
+      series: [{
+        values: [<%= data.overall %>],
+        indicator: [3, 0, 0, 0, 0],
+        "csize": "5"
+      }]
+    }
+    const breakdownConfig = {
+  type: "ring",
+  plot: {
+    slice: 0.7,
+    'value-box': {
+      visible: false
+    }
+  },
+  series: [
+    {
+      values: [50], //negative
+      'background-color': 'orangered'
+    }, {
+      values: [20], //neutral
+      'background-color': 'gold'
+    }, {
+      values: [30], //good
+      'background-color': 'green'
+    }
+
+  ]
+}
+    zingchart.render({
+	      id : 'overallSentiment',
+	      data : overallConfig,
+        width: 300,
+        height: 200,
+  });
+  zingchart.render({
+      id : 'breakdown',
+      data : breakdownConfig,
+      width: 180,
+      height: 250
+});
+  </script>
+</body>
