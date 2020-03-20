@@ -9,7 +9,8 @@ const port = 80;
 
 app.get('/', function(req, res){
   var data = {
-    overall: 0.7
+    overall: 0.6,
+    breakdown: [30, 20, 50] //positive, neutral, negative
   }
   res.render("\index", {
     data: data

@@ -7,9 +7,9 @@
   <style>
     .section {
       box-shadow: 0px 3px 5px 2px #888888;
-      padding: 10px;
-      display: inline-block;
+      padding: 10px 15px;
       margin: 30px;
+      display: inline-block;
     }
     .label {
       font-family: "Open Sans", sans-serif;
@@ -18,28 +18,89 @@
     }
     .bigNumber {
       font-family: "Open Sans", sans-serif;
-      font-size: 3em;
+      font-size: 4em;
+      display: inline;
+      margin: 0px;
     }
     .chart{
       display: inline-block;
+    }
+    .smalltext {
+      margin: 0;
+      display: inline;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+    }
+    .breakdown td {
+      vertical-align: center;
+    }
+    .material-icons {
+      font-size: 35px;
+      position: relative;
+      top: 6px;
+      color: black;
     }
   </style>
 </head>
 <body>
   <%- include ('./partials/header') %>
-  <div id = "overall" class = "section">
+  <div id = "overallSection" class = "section">
     <h1 class = "label">Overall Sentiment</h1>
+    <table>
+      <tr>
+        <td>
     <div id='overallSentiment' class = "chart"></div>
-    <div class = "chart">
-      0.7
+  </td>
+  <td>
+    <div class = "desc">
+      <h1 class = "bigNumber"><%= data.overall %></h1><h1 class = "smalltext">/1.0</h1></br>
+      <h1 class = "smalltext" id = "overallDesc"></h1>
     </div>
+  </tr>
+</table>
   </div>
-  <div id = "breakdownSentiment" class = "section">
+  <div id = "breakdownSection" class = "section">
+    <h1 class = "label">Breakdown</h1>
+    <table>
+      <tr>
+        <td>
     <div id='breakdown' class = "chart"></div>
-
+  </td>
+  <td>
+    <div class = "desc">
+      <table>
+        <tr>
+          <td>
+            <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: <%= data.breakdown[0] %>%</h1>
+          </td>
+        </tr>
+          <tr>
+            <td><h1 class = "smalltext" style = "color: coral"><i class="material-icons">  sentiment_satisfied</i> Neutral: <%= data.breakdown[1] %>%</h1>
+            </td>
+          </tr>
+            <tr>
+              <td><h1 class = "smalltext" style = "color: orangered"><i class="material-icons">sentiment_very_dissatisfied</i> Negative: <%= data.breakdown[2] %>%</h1>
+              </td>
+            </tr>
+      </table>
+    </div>
+  </tr>
+  </table>
   </div>
   <script>
-    console.log("<%= data.overall %>")
+  (function(){
+      var level = document.getElementById("overallDesc");
+      if (<%= data.overall %> < 0.4) {
+        level.innerHTML = "Negative";
+        level.style.color = "orangered"
+      } else if (<%= data.overall %> > 0.6) {
+        level.innerHTML = "Positive";
+        level.style.color = "green";
+      } else {
+        level.innerHTML = "Neutral";
+        level.style.color = "coral";
+      }
+    })();
     const overallConfig = {
       type: 'gauge',
       "plotarea":{
@@ -105,6 +166,9 @@
     }
     const breakdownConfig = {
   type: "ring",
+  "plotarea" : {
+    "y" : 20
+  },
   plot: {
     slice: 0.7,
     'value-box': {
@@ -113,13 +177,13 @@
   },
   series: [
     {
-      values: [50], //negative
+      values: [<%= data.breakdown[2] %>], //negative
       'background-color': 'orangered'
     }, {
-      values: [20], //neutral
+      values: [<%= data.breakdown[1] %>], //neutral
       'background-color': 'gold'
     }, {
-      values: [30], //good
+      values: [<%= data.breakdown[0] %>], //good
       'background-color': 'green'
     }
 
@@ -135,7 +199,7 @@
       id : 'breakdown',
       data : breakdownConfig,
       width: 180,
-      height: 250
+      height: 200
 });
   </script>
 </body>
