@@ -8,8 +8,9 @@
     .section {
       box-shadow: 0px 3px 5px 2px #888888;
       padding: 10px 15px;
-      margin: 30px;
+      margin: 15px 30px;
       display: inline-block;
+      border-radius: 5px;
     }
     .label {
       font-family: "Open Sans", sans-serif;
@@ -40,10 +41,17 @@
       top: 6px;
       color: black;
     }
+    .desc {
+      font-family: "Open Sans", sans-serif;
+    }
+    td {
+    }
   </style>
 </head>
 <body>
   <%- include ('./partials/header') %>
+  <div style="width: 90%; margin: 0 auto;">
+  <div style = "display: inline-block; float: left;">
   <div id = "overallSection" class = "section">
     <h1 class = "label">Overall Sentiment</h1>
     <table>
@@ -60,7 +68,7 @@
 </table>
   </div>
   <div id = "breakdownSection" class = "section">
-    <h1 class = "label">Breakdown</h1>
+    <h1 class = "label">Overall Sentiment Breakdown</h1>
     <table>
       <tr>
         <td>
@@ -75,7 +83,7 @@
           </td>
         </tr>
           <tr>
-            <td><h1 class = "smalltext" style = "color: coral"><i class="material-icons">  sentiment_satisfied</i> Neutral: <%= data.breakdown[1] %>%</h1>
+            <td><h1 class = "smalltext" style = "color: #e6ac00"><i class="material-icons">  sentiment_satisfied</i> Neutral: <%= data.breakdown[1] %>%</h1>
             </td>
           </tr>
             <tr>
@@ -87,8 +95,134 @@
   </tr>
   </table>
   </div>
+</br>
+<div class = "section">
+  <h1 class = "label">Timeline</h1>
+  <div id = "timelineChart"></div>
+</div>
+</div>
+  <div id = "sectorSection" class = "section" style="max-width: 35%">
+    <h1 class = "label">Breakdown by Sector</h1>
+    <table>
+      <tr>
+        <td>
+          <div class = "desc">
+            <table>
+              <tr>
+                <td colspan="2">
+                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: crimson">local_hospital</i> Healthcare</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="display: inline-block;">
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.healthcare.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h1 style="margin-left: 30px;" class = "smalltext" id = "healthcareOverall"></h1>
+                </td>
+                <td>
+                  <div id = "healthcareBreakdownChart" class = "chart"></div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: orange">monetization_on</i> Finance </h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="display: inline-block;">
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.finance.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h1 style="margin-left: 30px;" class = "smalltext" id = "financeOverall"></h1>
+                </td>
+                <td>
+                  <div id = "financeBreakdownChart" class = "chart"></div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: black">school</i> Education</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="display: inline-block;">
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.education.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h1 style="margin-left: 30px;" class = "smalltext" id = "educationOverall"></h1>
+                </td>
+                <td>
+                  <div id = "educationBreakdownChart" class = "chart"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        </tr>
+      </table>
+    </div>
+  </div>
   <script>
   (function(){
+    fetch("https://pomber.github.io/covid19/timeseries.json")
+    .then(response => response.json())
+    .then(data => {
+      var dates = [];
+      var lastFiveDays = [];
+      var len = data["Singapore"].length;
+        for (var i = len - 5; i < len; i++) {
+          lastFiveDays.push(data["Singapore"][i]["confirmed"]);
+          dates.push(data["Singapore"][i]["date"]);
+        }
+        const timelineConfig = {
+          type: 'mixed',
+
+ scaleX: {
+   labels: dates // one label for every datapoint
+ },
+ scaleY: {
+   guide: { // dashed lines
+     visible: false
+   },
+   label: {
+     text: 'Total Cases',
+     fontSize: '14px'
+   }
+ },
+ scaleY2: {
+   label: {
+     text: 'Sentiment',
+     fontSize: '14px'
+   },
+   maxValue: 1,
+   minValue: 0,
+   step: 0.1 // can define scale step values or default
+ },
+ series: [
+   {
+     type: 'bar',
+     text: 'Completed Tasks',
+     values: [0.7, 0.4, 0.6, 0.3, 0.5],
+     backgroundColor: '#ffa726',
+     scales: 'scale-x, scale-y-2',
+     "bar-width": "50%"
+   },
+   {
+     type: 'line',
+     text: 'Total Cases',
+     values: lastFiveDays,
+     lineColor: '#42a5f5',
+     marker: {
+       backgroundColor:"#333"
+
+     },
+     scales: 'scale-x, scale-y'
+   }
+
+ ]
+        }
+        zingchart.render({
+          id : 'timelineChart',
+          data : timelineConfig,
+          width: 1060,
+          height: 300
+        });
+    })
       var level = document.getElementById("overallDesc");
       if (<%= data.overall %> < 0.4) {
         level.innerHTML = "Negative";
@@ -98,7 +232,41 @@
         level.style.color = "green";
       } else {
         level.innerHTML = "Neutral";
-        level.style.color = "coral";
+        level.style.color = "#e6ac00";
+      }
+
+      var healthLevel = document.getElementById("healthcareOverall");
+      if (<%= data.healthcare.overall %> < 0.4) {
+        healthLevel.innerHTML = "Negative";
+        healthLevel.style.color = "orangered"
+      } else if (<%= data.healthcare.overall %> > 0.6) {
+        healthLevel.innerHTML = "Positive";
+        healthLevel.style.color = "green";
+      } else {
+        healthLevel.innerHTML = "Neutral";
+        healthLevel.style.color = "#e6ac00";
+      }
+      var financeLevel = document.getElementById("financeOverall");
+      if (<%= data.finance.overall %> < 0.4) {
+        financeLevel.innerHTML = "Negative";
+        financeLevel.style.color = "orangered"
+      } else if (<%= data.finance.overall %> > 0.6) {
+        financeLevel.innerHTML = "Positive";
+        financeLevel.style.color = "green";
+      } else {
+        financeLevel.innerHTML = "Neutral";
+        financeLevel.style.color = "#e6ac00";
+      }
+      var educationLevel = document.getElementById("educationOverall");
+      if (<%= data.education.overall %> < 0.4) {
+        educationLevel.innerHTML = "Negative";
+        educationLevel.style.color = "orangered"
+      } else if (<%= data.education.overall %> > 0.6) {
+        educationLevel.innerHTML = "Positive";
+        educationLevel.style.color = "green";
+      } else {
+        educationLevel.innerHTML = "Neutral";
+        educationLevel.style.color = "#e6ac00";
       }
     })();
     const overallConfig = {
@@ -123,7 +291,7 @@
               'background-color': "orangered"
             }, {
               rule: "%v >= 0.4 && %v <= 0.6",
-              'background-color': "gold"
+              'background-color': "#e6ac00"
             }, {
               rule: "%v >= 0.6 && %v <= 1.0",
               'background-color': 'green'
@@ -149,7 +317,7 @@
             }, {
               rule: "%v >= 0.4 && %v <= 0.6",
               text: "%v<br>Neutral",
-              'font-color': 'gold'
+              'font-color': '#e6ac00'
             },{
               rule: "%v > 0.6",
               text: "%v<br>Positive",
@@ -181,7 +349,7 @@
       'background-color': 'orangered'
     }, {
       values: [<%= data.breakdown[1] %>], //neutral
-      'background-color': 'gold'
+      'background-color': '#e6ac00'
     }, {
       values: [<%= data.breakdown[0] %>], //good
       'background-color': 'green'
@@ -189,7 +357,89 @@
 
   ]
 }
-    zingchart.render({
+
+const healthcareBreakdownConfig = {
+type: "ring",
+"plotarea" : {
+"x" : 10,
+"y" : 0,
+"margin": 0
+},
+plot: {
+'slice': 0.7,
+'value-box': {
+  visible: false
+}
+},
+series: [
+{
+  values: [<%= data.healthcare.breakdown[2] %>], //negative
+  'background-color': 'orangered'
+}, {
+  values: [<%= data.healthcare.breakdown[1] %>], //neutral
+  'background-color': '#e6ac00'
+}, {
+  values: [<%= data.healthcare.breakdown[0] %>], //good
+  'background-color': 'green'
+}
+
+]
+}
+const financeBreakdownConfig = {
+type: "ring",
+"plotarea" : {
+"x" : 10,
+"y" : 0,
+"margin": 0
+},
+plot: {
+'slice': 0.7,
+'value-box': {
+  visible: false
+}
+},
+series: [
+{
+  values: [<%= data.finance.breakdown[2] %>], //negative
+  'background-color': 'orangered'
+}, {
+  values: [<%= data.finance.breakdown[1] %>], //neutral
+  'background-color': '#e6ac00'
+}, {
+  values: [<%= data.finance.breakdown[0] %>], //good
+  'background-color': 'green'
+}
+
+]
+}
+const educationBreakdownConfig = {
+type: "ring",
+"plotarea" : {
+"x" : 10,
+"y" : 0,
+"margin": 0
+},
+plot: {
+'slice': 0.7,
+'value-box': {
+  visible: false
+}
+},
+series: [
+{
+  values: [<%= data.education.breakdown[2] %>], //negative
+  'background-color': 'orangered'
+}, {
+  values: [<%= data.education.breakdown[1] %>], //neutral
+  'background-color': '#e6ac00'
+}, {
+  values: [<%= data.education.breakdown[0] %>], //good
+  'background-color': 'green'
+}
+
+]
+}
+  zingchart.render({
 	      id : 'overallSentiment',
 	      data : overallConfig,
         width: 300,
@@ -200,6 +450,24 @@
       data : breakdownConfig,
       width: 180,
       height: 200
-});
+  });
+  zingchart.render({
+      id : 'healthcareBreakdownChart',
+      data : healthcareBreakdownConfig,
+      width: 150,
+      height: 130
+  });
+  zingchart.render({
+      id : 'financeBreakdownChart',
+      data : financeBreakdownConfig,
+      width: 150,
+      height: 130
+  });
+  zingchart.render({
+      id : 'educationBreakdownChart',
+      data : educationBreakdownConfig,
+      width: 150,
+      height: 130
+  });
   </script>
 </body>
