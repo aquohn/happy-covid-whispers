@@ -4,7 +4,7 @@ const partials = require("express-partials");
 const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
-
+app.use("/static", express.static("public"));
 
 const port = 80;
 
@@ -28,6 +28,10 @@ app.get('/', function(req, res){
   res.render("\index", {
     data: data
   });
+})
+
+app.get('/pi', function(req, res){
+  res.sendFile(__dirname + "/views/pi.html");
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
