@@ -34,4 +34,8 @@ app.get('/pi', function(req, res){
   res.sendFile(__dirname + "/views/pi.html");
 })
 
+app.get('/ownquote', function(req, res){
+  res.sendFile(__dirname + "/views/ownquote.html");
+})
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
