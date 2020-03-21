@@ -2,7 +2,6 @@
 <head>
   <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
   <script src="//www.zingchart.com/scripts/zcDocs.js"></script>
-  <link href='//www.zingchart.com/css/zcDocs.css' rel='stylesheet' type='text/css'>
   <script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
   <%- include ('./partials/head') %>
   <title>Covid19 Sentiment Analysis</title>
@@ -15,16 +14,15 @@
       display: inline-block;
       margin: 30px; */
     }
-    #time_sentiment_cases_plot {
+  #time_sentiment_cases_plot {
   height:80vh;
   width:100%;
   min-height:150px;
   float: left;
   }
-  #important_events {
+  #event_col {
     vertical-align: top;
-    overflow-y: auto;
-    max-height: 80vh;
+    line-height: normal;
   }
   .event_tiles {
     background-size: 500%;
@@ -34,6 +32,7 @@
     font-size: 1.2vw; 
     margin: 5px;
     box-shadow: none;
+    display: block;
   }
   .event_tiles:hover {
     cursor: pointer;
@@ -47,7 +46,7 @@
 </head>
 <body>
   <%- include ('./partials/header') %>
-  <table style="width:100%">
+  <table style="width:100%; ">
     <col width="70%">
     <col width="15%">
     <tr>
@@ -56,13 +55,16 @@
     </tr>
     <tr>
         <td id='time_sentiment_cases_plot'><a class="plot">Plot</a></td>
-        <td id="'important_events'"><a class="events">
-            <h2>Important Events</h2>
-        </a></td>
+        <td id='event_col'>
+          <h2 style="font-size: 2vw;">Important Events</h2>
+            <h2 style="text-align: center; max-height: 70vh; overflow: auto;">
+            <div" id="'important_events'"></div>
+            </h2></td>
     </tr>
   </table> 
   </div>
   <script>
+    const startUTC = 1579741200000;//23 jan 1st case
     function truncateString(str) {
     num = 20;
     if (str.length <= num) {
@@ -74,7 +76,7 @@
     .then(data => {
     var cases = [];
     var len = data["Singapore"].length;
-    for (var i = 56; i < len; i++) {
+    for (var i = 1; i < len; i++) {
         cases.push(data["Singapore"][i]["confirmed"]);
     }
     var important_events_list = { //day 0 is 18 march
@@ -112,13 +114,12 @@
         button.addEventListener("click", function() {
             zingchart.exec('time_sentiment_cases_plot', 'setguide', {
             graphid:0,
-            keyvalue: 1584493200000 + 24 * 3600000 * index
+            keyvalue: startUTC + 24 * 3600000 * index
             });
         })
         })(time)
         var ie = document.getElementById("'important_events'");
         ie.appendChild(button);
-        ie.appendChild(document.createElement("br"));
     }
     var sentiments = {
     "positive":[30,60,1],
@@ -151,7 +152,7 @@
                     }
                 },
                 "scale-x": {
-                    "min-value": 1584493200000,
+                    "min-value": startUTC,
                     "shadow": 0,
                     "step": 24 * 3600000,
                     "transform": {
