@@ -1,4 +1,30 @@
 <!DOCTYPE html>
+  <script>
+    const cycletime = 10 * 1000; // 10 seconds
+    let idx = 0;
+    function cycle() {
+      let xhttp = new XMLHttpRequest();
+      let cycleElem = document.getElementById("cycle");
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) { // fetching new msg succeeded
+          let initPos = cycleElem.style.top;
+          let pos = initPos;
+          //let cycleAnimation = setInterval(frame, 10);
+          function frame() {
+            
+          }
+          let msg = JSON.parse(this.responseText);
+          cycleElem.innerHTML = msg.text;
+          idx = (idx + 1) % msg.currlen;
+        }
+      }
+      xhttp.open("GET", "/nextquote?idx=" + idx, true);
+      xhttp.send();
+    }
+
+    cycle(); // why doesn't this fire once before the interval begins?
+    setInterval(cycle, cycletime);
+  </script>
 <head>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
   <title>Covid19</title>
@@ -40,8 +66,7 @@
 <body>
   <div id = "quote">
     <h1>
-      In these trying times, it is important that we keep our spirits up!<br/>
-      Stay safe :)
+      <span id = "cycle">Loading...</span>
     </h1>
   </div>
   <div id = "qr">
