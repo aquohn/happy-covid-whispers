@@ -13,8 +13,9 @@ const port = 80;
 const maxlen = 100;
 // const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
 
-let buf = ["No message yet!"];
-let writeidx = 0;
+//let buf = ["No message yet!"];
+let buf = ["No messages yet!"];
+let writeidx = 3;
 
 app.get('/', function(req, res){
   var data = {
@@ -52,9 +53,9 @@ app.get('/thankyou', function(req, res){
 
 app.get('/nextquote', function(req, res){
   let currlen = buf.length;
-  let idx = 0;
-  if ("idx" in req) {
-    idx = req.idx;
+  idx = parseInt(req.query.idx);
+  if (idx === NaN) {
+    idx = 0;
   }
   res.send({
     text: buf[idx],
