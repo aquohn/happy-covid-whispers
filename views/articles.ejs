@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<head>
+  <%- include ('./partials/head') %>
+  <title>Covid19 Sentiment Analysis</title>
+  <style>
+    #sidebar {
+      width: 30%;
+      max-height: 80vh;
+      overflow: auto;
+      float: left;
+    }
+    .title, .date {
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 400;
+    }
+    .date {
+      margin: 0;
+    }
+    .articlebox {
+      margin: 20px;
+      padding: 10px;
+      border-radius: 3px;
+      box-shadow: 0px 3px 5px 2px #888888;
+    }
+    .articlebox:hover {
+      cursor: pointer;
+      background-color: mediumseagreen;
+      color: white;
+    }
+    .articleboxclick {
+      margin: 20px;
+      padding: 10px;
+      border-radius: 3px;
+      box-shadow: 0px 3px 5px 2px #888888;
+      background-color: green;
+      color: white;
+    }
+    .article
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    #main {
+      width: 68%;
+      overflow-x: hidden;
+      float: right;
+      display: inline;
+    }
+    #main .title {
+      text-align: left;
+      font-weight: 400;
+      margin-bottom: 5px;
+      width: 90%;
+    }
+    .link, .outline, .summary {
+      font-family: 'Open Sans', sans-serif;
+      width: 90%;
+    }
+    .link {
+      margin: 5px;
+    }
+    a {
+      text-decoration: none;
+      color: steelblue;
+    }
+    .smalltext {
+      margin: 0;
+      display: inline;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+    }
+    td {
+      vertical-align: center;
+    }
+    .material-icons {
+      font-size: 35px;
+      position: relative;
+      top: 6px;
+      color: black;
+    }
+    .bigNumber {
+      font-family: "Open Sans", sans-serif;
+      font-size: 4em;
+      display: inline;
+      margin: 0px;
+    }
+    #summaryText {
+      max-height: 80px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <%- include ('./partials/header') %>
+  <div id = 'sidebar'>
+  <% for (var i = 0; i < Object.keys(data['title']).length; i++){ %>
+    <div class = 'articlebox' id = '<%= i %>' onclick='(function onclick() {
+      document.getElementById("maintitle").innerHTML ="<%= data["title"][i] %>";
+      document.getElementById("source").innerHTML ="<%= data["url"][i] %>";
+      document.getElementById("date").innerHTML ="<%= data["date"][i] %>";
+      document.getElementById("link").href ="<%= data["url"][i] %>";
+      document.getElementById("summaryText").innerHTML ="<%= data["summary"][i] %>";
+    })(); test(<%= i %>)'>
+    <h3 class = 'title'><%= data['title'][i] %></h3>
+    <h5 class = 'date'><%= data['date'][i] %>, Sentiment: <%= data['reactions'][i]['Like'] %></h5>
+    </div>
+  <% } %>
+  </div>
+  <div id = 'main'>
+    <h1 class = 'title' id = 'maintitle'><%= data['title'][prev] %></h1>
+    <h4 class = 'link'><span id = 'date'><%= data['date'][prev] %></span>, Source: <a id = "link" href = '<%= data['url'][0] %>' target ='_blank'><span  id = 'source'> <%= data['url'][0] %></span></a></h4>
+    <hr align = 'left' width = '90%'>
+    <p class = 'summary' id = 'summaryText'><%= data['summary'][prev] %></p>
+    <hr align = 'left' width = '90%'>
+    <div style="display: inline-block">
+      <table>
+      <tr>
+        <td>
+          <h3 class = 'title'>Overall Sentiment</h3>
+        </td>
+        <tr>
+          <td>
+            <div id = "sentiment"></div>
+          </td>
+          <td>
+            <h1 class = "bigNumber">0.6</h1><br/>
+            <h1 class = "smalltext" id = "overallDesc"></h1>
+          </td>
+        </tr>
+        <td>
+        </table>
+      </div>
+      <div style="display: inline-block; margin-left: 40px;">
+          <table>
+            <tr>
+              <td>
+                <h3 class = 'title'>Breakdown</h3>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div id = "breakdown"></div>
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: 20%</h1>
+                    </td>
+                  </tr>
+                    <tr>
+                      <td><h1 class = "smalltext" style = "color: #e6ac00"><i class="material-icons">  sentiment_satisfied</i> Neutral: 30%</h1>
+                      </td>
+                    </tr>
+                      <tr>
+                        <td><h1 class = "smalltext" style = "color: orangered"><i class="material-icons">sentiment_very_dissatisfied</i> Negative: 50%>%</h1>
+                        </td>
+                      </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div display>
+          <h3 class = 'title'>Word Cloud</h3>
+          <div id = "wordcloud" style="width: 1000px; margin: auto;"></div>
+        </div>
+  </div>
+  <script>
+    var curr = 0;
+    var summaries = [];
+    (function(){
+      <% for (var i = 0; i < Object.keys(data['title']).length; i++){ %>
+        summaries.push("<%= data["summary"][i] %>");
+      <% } %>
+      console.log(summaries);
+      console.log('hi');
+      var div = document.getElementById('0');
+      div.classList.add('articleboxclick');
+      div.classList.remove('articlebox');
+
+      var level = document.getElementById("overallDesc");
+      if (<%= prev %> < -0.3) {
+        level.innerHTML = "Negative";
+        level.style.color = "orangered"
+      } else if (<%= prev %> > 0.3) {
+        level.innerHTML = "Positive";
+        level.style.color = "green";
+      } else {
+        level.innerHTML = "Neutral";
+        level.style.color = "#e6ac00";
+      }
+    })();
+
+    function test(i) {
+      var div = document.getElementById(i);
+      var prev = document.getElementById(curr);
+      prev.classList.remove('articleboxclick');
+      prev.classList.add('articlebox');
+      div.classList.add('articleboxclick');
+      curr = i;
+      <%- prev -= 2 %>;
+      console.log(<%= prev %>);
+      zingchart.render({
+            id : 'sentiment',
+            data : overallConfig,
+            width: 300,
+            height: 200,
+      });
+      zingchart.render({
+            id : 'breakdown',
+            data : breakdownConfig,
+            width: 200,
+            height: 200,
+      });
+      let wordcloudConfig = {
+          type: "wordcloud",
+          options: {
+            text: summaries[i],
+            minLength: 5,
+            maxItems: 10,
+            aspect: "flow-center"
+          }
+      }
+      zingchart.render({
+    id: 'wordcloud',
+    data: wordcloudConfig,
+    height: 150,
+    width: '100%'
+  });
+    }
+
+    const overallConfig = {
+      type: 'gauge',
+      "plotarea":{
+        "y": 60
+   },
+      scale: {
+        'size-factor': 1.4
+      },
+      'scale-r': {
+        aperture: 200,
+        values: "-1:1:0.1",
+        center: {
+          visible: false
+        },
+        ring: {
+          size: 10,
+          rules: [
+            {
+              rule: "%v < -0.3",
+              'background-color': "orangered"
+            }, {
+              rule: "%v >= -0.3 && %v <= 0.3",
+              'background-color': "#e6ac00"
+            }, {
+              rule: "%v >= 0.3 && %v <= 1.0",
+              'background-color': 'green'
+            }
+          ]
+        }
+      },
+      plot: {
+        csize: "5%",
+        size: "80%",
+        'background-color': "#000000",
+        'value-box': { //Value Boxes
+          placement: "center",  //Specify placement at "center", "tip", or "edge".
+          visible: false,
+          text: "%v",
+          fontSize: 25,
+          'font-color': "black",
+          rules: [
+            {
+              rule: "%v < -0.3",
+              text: "%v<br>Negative",
+              'font-color': 'orangered'
+            }, {
+              rule: "%v >= -0.3 && %v <= 0.3",
+              text: "%v<br>Neutral",
+              'font-color': '#e6ac00'
+            },{
+              rule: "%v > 0.3",
+              text: "%v<br>Positive",
+              'font-color': 'green'
+            },
+          ]
+        }
+      },
+      series: [{
+        values: [0.3],
+        indicator: [3, 0, 0, 0, 0],
+        "csize": "5"
+      }]
+    }
+    const breakdownConfig = {
+  type: "ring",
+  "plotarea" : {
+    "y" : 20
+  },
+  plot: {
+    slice: 0.7,
+    'value-box': {
+      visible: false
+    }
+  },
+  series: [
+    {
+      values: [50], //negative
+      'background-color': 'orangered'
+    }, {
+      values: [30], //neutral
+      'background-color': '#e6ac00'
+    }, {
+      values: [20], //good
+      'background-color': 'green'
+    }
+
+  ]
+}
+var wordcloudConfig = {
+  type: "wordcloud",
+  options: {
+    text: "<%= data['summary'][0] %>",
+    minLength: 5,
+    maxItems: 10,
+    aspect: "flow-center"
+  }
+}
+    zingchart.render({
+          id : 'sentiment',
+          data : overallConfig,
+          width: 300,
+          height: 200,
+    });
+    zingchart.render({
+          id : 'breakdown',
+          data : breakdownConfig,
+          width: 200,
+          height: 200,
+    });
+    zingchart.render({
+	id: 'wordcloud',
+	data: wordcloudConfig,
+	height: 150,
+	width: '100%'
+});
+  </script>
+</body>
