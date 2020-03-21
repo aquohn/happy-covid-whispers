@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+  <script src="//www.zingchart.com/scripts/zcDocs.js"></script>
+  <link href='//www.zingchart.com/css/zcDocs.css' rel='stylesheet' type='text/css'>
+  <script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
+  <%- include ('./partials/head') %>
+  <title>Covid19 Sentiment Analysis</title>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      /* box-shadow: 0px 3px 5px 2px #888888;
+      padding: 10px;
+      display: inline-block;
+      margin: 30px; */
+    }
+    #time_sentiment_cases_plot {
+  height:80vh;
+  width:100%;
+  min-height:150px;
+  float: left;
+  }
+  #important_events {
+    vertical-align: top;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+  .event_tiles {
+    background-size: 500%;
+    border: none;
+    border-radius: 5rem;
+    /* box-shadow: 0 .5rem 1rem; */
+    font-size: 1.2vw; 
+    margin: 5px;
+    box-shadow: none;
+  }
+  .event_tiles:hover {
+    cursor: pointer;
+    background-color: grey;
+    color: white;
+  }
+  .plot {
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <%- include ('./partials/header') %>
+  <table style="width:100%">
+    <col width="70%">
+    <col width="15%">
+    <tr>
+      <th></th>
+      <th></th>
+    </tr>
+    <tr>
+        <td id='time_sentiment_cases_plot'><a class="plot">Plot</a></td>
+        <td id="'important_events'"><a class="events">
+            <h2>Important Events</h2>
+        </a></td>
+    </tr>
+  </table> 
+  </div>
+  <script>
+    function truncateString(str) {
+    num = 20;
+    if (str.length <= num) {
+      return str;
+    }
+    return str.slice(0, num) + '...';
+    }
+    fetch("https://pomber.github.io/covid19/timeseries.json").then(response => response.json())
+    .then(data => {
+    var cases = [];
+    var len = data["Singapore"].length;
+    for (var i = 56; i < len; i++) {
+        cases.push(data["Singapore"][i]["confirmed"]);
+    }
+    var important_events_list = { //day 0 is 18 march
+        "event0": 0,
+        "event1 long ass title thingy a...sda..asdasfasfafs": 1,
+        "asasdas":2,
+        "asasas":0,
+        "asasaddas":2,
+        "asasdasfs":1,
+        "asasda1":0,
+        "asasd31s":2,
+        "asasda31":0,
+        "asasd4s":1,
+        "asasd214s":0,
+        "asasd12s":0,
+        "asa11sdas":0,
+        "asasd23as":0,
+        "asasd14141414as":0,
+        "asasd141414as":0,
+        "asasd51515s":0,
+        "asasd311as":0,
+        "asasdasa":0,
+        "asasdaq3s":0,
+        "dddd":0,
+        "a":0,
+        "c":0,
+        "b":0,
+    }
+    for ([event, time] of Object.entries(important_events_list)) {
+        var button = document.createElement("input");
+        button.type = "button";
+        button.value = truncateString(event);
+        button.className = "event_tiles";
+        (function(index){
+        button.addEventListener("click", function() {
+            zingchart.exec('time_sentiment_cases_plot', 'setguide', {
+            graphid:0,
+            keyvalue: 1584493200000 + 24 * 3600000 * index
+            });
+        })
+        })(time)
+        var ie = document.getElementById("'important_events'");
+        ie.appendChild(button);
+        ie.appendChild(document.createElement("br"));
+    }
+    var sentiments = {
+    "positive":[30,60,1],
+    "neutral":[41,23,5],
+    "negative":[32,55,8]};
+    var plotConfig = 
+            {
+                "type": "mixed",
+                "utc": true,
+                "title": {
+                    "text": "Sentiments over time",
+                    "font-size": "24px",
+                    "adjust-layout":true
+                },
+                "plotarea": {
+                    "margin": "dynamic 45 60 dynamic",
+                },
+                "legend": {
+                    "layout": "float",
+                    "background-color": "none",
+                    "border-width": 0,
+                    "shadow": 0,
+                    "align":"center",
+                    "adjust-layout":true,
+                  	"toggle-action": "remove",
+                    "item":{
+                      "padding": 7,
+                      "marginRight": 17,
+                      "cursor":"hand"
+                    }
+                },
+                "scale-x": {
+                    "min-value": 1584493200000,
+                    "shadow": 0,
+                    "step": 24 * 3600000,
+                    "transform": {
+                        "type": "date",
+                        "all": "%D, %d %M<br />",
+                        "guide": {
+                            "visible": true,
+                            'colour': "purple"
+                        },
+                        "item": {
+                            "visible": false
+                        }
+                    },
+                    "label": {
+                        "visible": false
+                    },
+                    "minor-ticks": 0
+                },
+                "scale-y": {
+                    "line-color": "#f6f7f8",
+                    "shadow": 0,
+                    "guide": {
+                        "line-style": "dashed"
+                    },
+                    "label": {
+                        // "text": "Page Views",
+                    },
+                    "minor-ticks": 0,
+                    "thousands-separator": ","
+                },
+                "crosshair-x": {
+                    "line-color": "#efefef",
+                    "plot-label": {
+                        "border-radius": "5px",
+                        "border-width": "1px",
+                        "border-color": "#f6f7f8",
+                        "padding": "10px",
+                        "font-weight": "bold"
+                    },
+                    "scale-label": {
+                        "font-color": "#000",
+                        "background-color": "#f6f7f8",
+                        "border-radius": "5px"
+                    }
+                },
+                "tooltip": {
+                    "visible": false
+                },
+                "plot": {
+                    "highlight":true,
+                    "tooltip-text": "%t views: %v<br>%k",
+                    "shadow": 0,
+                    "line-width": "2px",
+                    "marker": {
+                        "type": "circle",
+                        "size": 3
+                    },
+                    "highlight-state": {
+                        "line-width":3
+                    },
+                    "animation":{
+                      "effect":1,
+                      "sequence":2,
+                      "speed":100,
+                    }
+                },
+                "series": [
+                    {
+                        "values": cases,
+                        "type": "line",
+                        "text": "Total Cases",
+                        "line-color": "#007790",
+                        "legend-item":{
+                          "background-color": "#007790",
+                          "borderRadius":5,
+                           "font-color":"white"
+                        },
+                        "legend-marker": {
+                            "visible":false
+                        },
+                        "marker": {
+                            "background-color": "#007790",
+                            "border-width": 1,
+                            "shadow": 0,
+                            "border-color": "#69dbf1"
+                        },
+                        "highlight-marker":{
+                          "size":6,
+                          "background-color": "#007790",
+                        }
+                    },  
+                    {
+                        "values": sentiments["negative"],
+                        "stacked":true,
+                        "type": "bar",
+                        "text": "Negative",
+                        "line-color": "#da534d",
+                        "legend-item":{
+                          "background-color": "#da534d",
+                          "borderRadius":5,
+                          "font-color":"white"
+                        },
+                        "legend-marker": {
+                            "visible":false
+                        },
+                        "marker": {
+                            "background-color": "#da534d",
+                            "border-width": 1,
+                            "shadow": 0,
+                            "border-color": "#faa39f"
+                        },
+                        "highlight-marker":{
+                          "size":6,
+                          "background-color": "#da534d",
+                        }
+                    },
+                    {
+                        "values": sentiments["neutral"],
+                        "stacked":true,
+                        "type": "bar",
+                        "backgroundColor" : "orange",
+                        "text": "Neutral",
+                        "line-color": "orange",
+                        "legend-item":{
+                          "background-color": "orange",
+                          "borderRadius":5,
+                          "font-color":"white"
+                        },
+                        "legend-marker": {
+                            "visible":false
+                        },
+                        "marker": {
+                            "background-color": "#DDBF00",
+                            "border-width": 1,
+                            "shadow": 0,
+                            "border-color": "#DDBF00"
+                        },
+                        "highlight-marker":{
+                          "size":6,
+                          "background-color": "#DDBF00",
+                        }
+                    },
+                    {
+                        "values": sentiments["positive"],
+                        "stacked":true,
+                        "type": "bar",
+                        "backgroundColor" : "green",
+                        "text": "Positive",
+                        "line-color": "orange",
+                        "legend-item":{
+                          "background-color": "green",
+                          "borderRadius":5,
+                          "font-color":"white"
+                        },
+                        "legend-marker": {
+                            "visible":false
+                        },
+                        "marker": {
+                            "background-color": "#DDBF00",
+                            "border-width": 1,
+                            "shadow": 0,
+                            "border-color": "#DDBF00"
+                        },
+                        "highlight-marker":{
+                          "size":6,
+                          "background-color": "#DDBF00",
+                        }
+                    },
+                ]
+            };
+    zingchart.render({ 
+    	id : 'time_sentiment_cases_plot', 
+    	data : plotConfig, 
+    	height: '100%', 
+    	width: '100%' 
+    });
+    })
+  </script>
+</body>
