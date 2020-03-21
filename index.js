@@ -44,6 +44,10 @@ app.get('/ownquote', function(req, res){
   res.sendFile(__dirname + "/views/ownquote.html");
 })
 
+app.get('/thankyou', function(req, res){
+  res.sendFile(__dirname + "/views/thankyou.html");
+})
+
 app.post('/postquote', function(req, res){
   let quote = req.body.quote;
   writeidx = (writeidx + 1) % maxidx;

@@ -12,11 +12,10 @@ body {
     margin: 0 auto;
     text-align: center;
     font-family: "Open Sans", sans-serif;
+    padding: 2vh 0;
   }
   #prompt h1 {
-    padding-top: 2vh;
-    padding-left: 3vw;
-    padding-right: 3vw;
+    padding: 0 3vw;
   }
   #promptform {
     width: 100%;
@@ -42,11 +41,8 @@ body {
 </head>
 <body>
   <div id="prompt">
-    <h1>Write your own encouraging quote here!</h1>
-    <form id="promptform" action="/postquote" method=post>
-      <textarea name="quote" maxlength=270></textarea><br />
-      <!-- <div style="padding-top:1vh;font-size:small">All posts automatically tagged <a href="https://twitter.com/hashtag/Covid_19">#Covid_19</a></div> !-->
-      <br /><input type="submit" value="Post!"><br />
-    </form>
+    <h1>Thank you for your message!</h1><br />
+    Click <a href="/pi">here</a> to go to the message dashboard!<br />
+    Or click <a href="/">here</a> to see what everyone else in Singapore is feeling about the virus!<br />
   </div>
 </body>
