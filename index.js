@@ -10,8 +10,8 @@ app.use(bodyParser.urlencoded({extended : false})); // no complicated post reque
 
 const port = 80;
 
-const maxidx = 9;
-const update_interval = 5 * 60 * 1000; // 5 minutes
+const maxidx = 100;
+// const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
 
 let buf = [];
 let writeidx = 0;
@@ -56,7 +56,6 @@ app.post('/postquote', function(req, res){
   buf[writeidx] = quote;
   /* Code for Twitter version */
   /* quote += " _#Covid_19"; */
-  
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 
