@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <head>
-  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
-
   <%- include ('./partials/head') %>
   <title>Covid19 Sentiment Analysis</title>
   <style>
@@ -61,7 +59,7 @@
   </td>
   <td>
     <div class = "desc">
-      <h1 class = "bigNumber"><%= data.overall %></h1><h1 class = "smalltext">/1.0</h1></br>
+      <h1 class = "bigNumber"><%= data.overall %></h1><h1 class = "smalltext"></h1></br>
       <h1 class = "smalltext" id = "overallDesc"></h1>
     </div>
   </tr>
@@ -115,7 +113,7 @@
               </tr>
               <tr>
                 <td style="display: inline-block;">
-                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.healthcare.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.healthcare.overall %></h2><h2 class = "smalltext"></h2></br>
                   <h1 style="margin-left: 30px;" class = "smalltext" id = "healthcareOverall"></h1>
                 </td>
                 <td>
@@ -129,7 +127,7 @@
               </tr>
               <tr>
                 <td style="display: inline-block;">
-                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.finance.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.finance.overall %></h2><h2 class = "smalltext"></h2></br>
                   <h1 style="margin-left: 30px;" class = "smalltext" id = "financeOverall"></h1>
                 </td>
                 <td>
@@ -143,7 +141,7 @@
               </tr>
               <tr>
                 <td style="display: inline-block;">
-                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.education.overall %></h2><h2 class = "smalltext">/1.0</h2></br>
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.education.overall %></h2><h2 class = "smalltext"></h2></br>
                   <h1 style="margin-left: 30px;" class = "smalltext" id = "educationOverall"></h1>
                 </td>
                 <td>
@@ -164,11 +162,19 @@
     .then(data => {
       var dates = [];
       var lastFiveDays = [];
-      var len = data["Singapore"].length;
+      var i = data["Singapore"].length - 1;
+      while (data["Singapore"][i]["date"] != '2020-3-17') {
+        lastFiveDays.push(data["Singapore"][i]["confirmed"]);
+        dates.push(data["Singapore"][i]["date"]);
+        i--;
+      }
+      lastFiveDays.reverse();
+      dates.reverse();
+      /**
         for (var i = len - 5; i < len; i++) {
           lastFiveDays.push(data["Singapore"][i]["confirmed"]);
           dates.push(data["Singapore"][i]["date"]);
-        }
+        }**/
         const timelineConfig = {
           type: 'mixed',
 
@@ -185,22 +191,24 @@
    }
  },
  scaleY2: {
+   guide: {
+     visible: false
+   },
    label: {
      text: 'Sentiment',
      fontSize: '14px'
    },
    maxValue: 1,
-   minValue: 0,
-   step: 0.1 // can define scale step values or default
+   minValue: -1,
  },
  series: [
    {
      type: 'bar',
-     text: 'Completed Tasks',
-     values: [0.7, 0.4, 0.6, 0.3, 0.5],
+     text: 'Sentiment',
+     values: [0.7, -0.3, -0.8],
      backgroundColor: '#ffa726',
      scales: 'scale-x, scale-y-2',
-     "bar-width": "50%"
+     "bar-width": "50"
    },
    {
      type: 'line',
@@ -224,10 +232,10 @@
         });
     })
       var level = document.getElementById("overallDesc");
-      if (<%= data.overall %> < 0.4) {
+      if (<%= data.overall %> < -0.3) {
         level.innerHTML = "Negative";
         level.style.color = "orangered"
-      } else if (<%= data.overall %> > 0.6) {
+      } else if (<%= data.overall %> > 0.3) {
         level.innerHTML = "Positive";
         level.style.color = "green";
       } else {
@@ -236,10 +244,10 @@
       }
 
       var healthLevel = document.getElementById("healthcareOverall");
-      if (<%= data.healthcare.overall %> < 0.4) {
+      if (<%= data.healthcare.overall %> < -0.3) {
         healthLevel.innerHTML = "Negative";
         healthLevel.style.color = "orangered"
-      } else if (<%= data.healthcare.overall %> > 0.6) {
+      } else if (<%= data.healthcare.overall %> > 0.3) {
         healthLevel.innerHTML = "Positive";
         healthLevel.style.color = "green";
       } else {
@@ -247,10 +255,10 @@
         healthLevel.style.color = "#e6ac00";
       }
       var financeLevel = document.getElementById("financeOverall");
-      if (<%= data.finance.overall %> < 0.4) {
+      if (<%= data.finance.overall %> < -0.3) {
         financeLevel.innerHTML = "Negative";
         financeLevel.style.color = "orangered"
-      } else if (<%= data.finance.overall %> > 0.6) {
+      } else if (<%= data.finance.overall %> > 0.3) {
         financeLevel.innerHTML = "Positive";
         financeLevel.style.color = "green";
       } else {
@@ -258,10 +266,10 @@
         financeLevel.style.color = "#e6ac00";
       }
       var educationLevel = document.getElementById("educationOverall");
-      if (<%= data.education.overall %> < 0.4) {
+      if (<%= data.education.overall %> < -0.3) {
         educationLevel.innerHTML = "Negative";
         educationLevel.style.color = "orangered"
-      } else if (<%= data.education.overall %> > 0.6) {
+      } else if (<%= data.education.overall %> > 0.3) {
         educationLevel.innerHTML = "Positive";
         educationLevel.style.color = "green";
       } else {
@@ -279,7 +287,7 @@
       },
       'scale-r': {
         aperture: 200,
-        values: "0:1:0.1",
+        values: "-1:1:0.1",
         center: {
           visible: false
         },
@@ -287,13 +295,13 @@
           size: 10,
           rules: [
             {
-              rule: "%v >= 0 && %v <= 0.4",
+              rule: "%v < -0.3",
               'background-color': "orangered"
             }, {
-              rule: "%v >= 0.4 && %v <= 0.6",
+              rule: "%v >= -0.3 && %v <= 0.3",
               'background-color': "#e6ac00"
             }, {
-              rule: "%v >= 0.6 && %v <= 1.0",
+              rule: "%v >= 0.3 && %v <= 1.0",
               'background-color': 'green'
             }
           ]
@@ -311,15 +319,15 @@
           'font-color': "black",
           rules: [
             {
-              rule: "%v < 0.4",
+              rule: "%v < -0.3",
               text: "%v<br>Negative",
               'font-color': 'orangered'
             }, {
-              rule: "%v >= 0.4 && %v <= 0.6",
+              rule: "%v >= -0.3 && %v <= 0.3",
               text: "%v<br>Neutral",
               'font-color': '#e6ac00'
             },{
-              rule: "%v > 0.6",
+              rule: "%v > 0.3",
               text: "%v<br>Positive",
               'font-color': 'green'
             },

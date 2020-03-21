@@ -1,6 +1,7 @@
 const express = require("express");
-const https = require("https");
+const fs = require("fs");
 const partials = require("express-partials");
+const request = require("request");
 const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -27,6 +28,22 @@ app.get('/', function(req, res){
   }
   res.render("\index", {
     data: data
+  });
+})
+
+app.get('/articles', function( req, res){
+  let rawdata = fs.readFileSync('./sample.json');
+  let data = JSON.parse(rawdata);
+  var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  for (var i = 0; i < Object.keys(data["date"]).length; i++) {
+    var d = new Date(data["date"][i]);
+    data["date"][i] = days[d.getDay()] + ", " + d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
+  }
+  var prev = 0;
+  res.render("\articles.ejs", {
+    data: data,
+    onclick: "test()",
+    prev: prev
   });
 })
 
