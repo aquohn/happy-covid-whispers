@@ -50,6 +50,19 @@ app.get('/thankyou', function(req, res){
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 
+app.get('/nextquote', function(req, res){
+  let currlen = buf.length;
+  let idx = 0;
+  if ("idx" in req) {
+    idx = req.idx;
+  }
+  res.send({
+    text: buf[idx],
+    maxidx: currlen
+  });
+})
+
+
 app.post('/postquote', function(req, res){
   let quote = req.body.quote;
   writeidx = (writeidx + 1) % maxidx;
