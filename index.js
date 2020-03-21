@@ -8,6 +8,12 @@ app.use("/static", express.static("public"));
 
 const port = 80;
 
+const maxidx = 9;
+const update_interval = 5 * 60 * 1000; // 5 minutes
+
+let buf = [];
+let writeidx = 0;
+
 app.get('/', function(req, res){
   var data = {
     overall: 0.6,
@@ -36,6 +42,16 @@ app.get('/pi', function(req, res){
 
 app.get('/ownquote', function(req, res){
   res.sendFile(__dirname + "/views/ownquote.html");
+})
+
+app.post('/postquote', function(req, res){
+  let quote = req.body.quote;
+  writeidx = (writeidx + 1) % maxidx;
+  buf[writeidx] = quote;
+  /* Code for Twitter version */
+  /* quote += " _#Covid_19"; */
+  
+  res.sendFile(__dirname + "/views/thankyou.html");
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
