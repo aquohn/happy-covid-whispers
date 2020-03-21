@@ -1,10 +1,12 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const https = require("https");
 const partials = require("express-partials");
 const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
 app.use("/static", express.static("public"));
+app.use(bodyParser.urlencoded({extended : false})); // no complicated post requests
 
 const port = 80;
 
