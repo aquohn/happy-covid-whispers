@@ -1,9 +1,9 @@
 const express = require("express");
+const request = require("request");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const https = require("https");
 const partials = require("express-partials");
-const request = require("request");
 const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -15,7 +15,7 @@ const port = 80;
 const maxlen = 100;
 // const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
 
-let buf = ["No message yet!"];
+let buf = ["No messages yet!"];
 let writeidx = 0;
 
 app.get('/', function(req, res){
@@ -120,12 +120,16 @@ app.get('/thankyou', function(req, res){
 
 app.get('/nextquote', function(req, res){
   let currlen = buf.length;
-  let idx = 0;
-  if ("idx" in req) {
-    idx = req.idx;
+  idx = parseInt(req.query.idx);
+  if (!idx) { // default for all falsy values
+    idx = 0;
+  }
+  let text = buf[idx];
+  if (!text) {
+    text = "Loading..."; // yes this is very hacky
   }
   res.send({
-    text: buf[idx],
+    text: text,
     currlen: currlen.toString()
   });
 })
@@ -139,6 +143,55 @@ app.post('/postquote', function(req, res){
   /* Code for Twitter version */
   /* quote += " _#Covid_19"; */
   res.sendFile(__dirname + "/views/thankyou.html");
+})
+app.get('/timeline', function(req, res){
+  request('http://f330e25c.ngrok.io/overall', function(err, response, body) {
+    var data = JSON.parse(body);
+  const important_event_cutoff = 0;
+  // const startUTC = 1579712400000; //23 jan 
+  const startUTC = 1584032400000;//13th march
+  const firstDayUTC = 1579712400000;//23 jan 
+  const dayConst = 24 * 3600000;
+  const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
+  let news = {};
+  for ([post_index, utcx] of Object.entries(data['date'])) {
+    dayNumber = Math.floor((utcx - firstDayUTC) /dayConst).toString()
+    if (!(dayNumber in news)) {
+      news[dayNumber] = [post_index];
+    } else {
+      news[dayNumber].push(post_index);
+    }
+  }
+  var d = new Date();
+  var currentDay = Math.floor((d.getTime() - firstDayUTC) / dayConst);
+  let positive = [];
+  let neutral = [];
+  let negative = [];
+  let important_events = {};
+  for (var i = currentDay; i >= startDay; i --) { //i number of days since strike (day 1)
+    positive.unshift(0);
+    neutral.unshift(0); 
+    negative.unshift(0);
+    if (i.toString() in news) {
+      for (var j = 0; j < news[i.toString()].length; j ++) { 
+        positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
+        neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
+        negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
+        if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) { 
+          important_events[(data['title'][(news[i.toString()][j]).toString()])] = i;
+        }
+      }
+    }
+  }
+  let sentiments = {'positive':positive, 'neutral':neutral, 'negative':negative};
+  res.render("timeline", {
+     sentiments: sentiments,
+     events: important_events,
+     startUTC: startUTC,
+     startDay: startDay,
+     firstDayUTC: firstDayUTC,
+  });
+})
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

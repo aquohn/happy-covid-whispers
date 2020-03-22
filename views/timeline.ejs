@@ -9,13 +9,9 @@
     html, body {
       height: 100%;
       width: 100%;
-      /* box-shadow: 0px 3px 5px 2px #888888;
-      padding: 10px;
-      display: inline-block;
-      margin: 30px; */
     }
   #time_sentiment_cases_plot {
-  height:80vh;
+  height:75vh;
   width:100%;
   min-height:150px;
   float: left;
@@ -25,18 +21,29 @@
     line-height: normal;
   }
   .event_tiles {
-    background-size: 500%;
+    text-align: left;
+    white-space: normal;
     border: none;
-    border-radius: 5rem;
-    /* box-shadow: 0 .5rem 1rem; */
+    background-color: white;
+    border-radius: 3px;
+    box-shadow: 0 .5rem 1rem;
     font-size: 1.2vw; 
-    margin: 5px;
-    box-shadow: none;
+    margin: 3vh;
+    padding: 5px;
+    box-shadow: 0px 3px 5px 2px #888888;
     display: block;
+    width: 25vw;
+    word-wrap: normal;
+    font-family: "Open Sans", sans-serif;
   }
   .event_tiles:hover {
     cursor: pointer;
-    background-color: grey;
+    background-color: mediumseagreen;
+    color: white;
+  }
+  .event_tiles:focus {
+    cursor: pointer;
+    background-color: green;
     color: white;
   }
   .plot {
@@ -47,8 +54,8 @@
 <body>
   <%- include ('./partials/header') %>
   <table style="width:100%; ">
-    <col width="70%">
-    <col width="15%">
+    <col width="60%">
+    <col width="25%">
     <tr>
       <th></th>
       <th></th>
@@ -56,86 +63,65 @@
     <tr>
         <td id='time_sentiment_cases_plot'><a class="plot">Plot</a></td>
         <td id='event_col'>
-          <h2 style="font-size: 2vw;">Important Events</h2>
-            <h2 style="text-align: center; max-height: 70vh; overflow: auto;">
+          <h2 style="font-size: 2vw; font-family: Open Sans, sans-serif;
+          font-weight: 400;margin-left: 5%;">Headlines</h2>
+           <h2 style="text-align: center; max-height: 60vh; overflow: auto;">
             <div" id="'important_events'"></div>
             </h2></td>
     </tr>
   </table> 
   </div>
   <script>
-    const startUTC = 1579741200000;//23 jan 1st case
-    function truncateString(str) {
-    num = 20;
+    const startUTC = <%=startUTC%>;
+    function formatString(str) {
+    num = 150;
     if (str.length <= num) {
-      return str;
+      return str.replace("+","'");
     }
-    return str.slice(0, num) + '...';
+    return str.replace("+","'").slice(0, num) + '...';
     }
     fetch("https://pomber.github.io/covid19/timeseries.json").then(response => response.json())
     .then(data => {
     var cases = [];
     var len = data["Singapore"].length;
-    for (var i = 1; i < len; i++) {
+    for (var i = 1 + <%=startDay %>; i < len; i++) {
         cases.push(data["Singapore"][i]["confirmed"]);
     }
-    var important_events_list = { //day 0 is 18 march
-        "event0": 0,
-        "event1 long ass title thingy a...sda..asdasfasfafs": 1,
-        "asasdas":2,
-        "asasas":0,
-        "asasaddas":2,
-        "asasdasfs":1,
-        "asasda1":0,
-        "asasd31s":2,
-        "asasda31":0,
-        "asasd4s":1,
-        "asasd214s":0,
-        "asasd12s":0,
-        "asa11sdas":0,
-        "asasd23as":0,
-        "asasd14141414as":0,
-        "asasd141414as":0,
-        "asasd51515s":0,
-        "asasd311as":0,
-        "asasdasa":0,
-        "asasdaq3s":0,
-        "dddd":0,
-        "a":0,
-        "c":0,
-        "b":0,
+    var important_events_list = {
+        <% Object.keys(events).forEach(function(key) { %>
+       "<%= key %>": <%= events[key] %>,
+        <% }); %>
     }
     for ([event, time] of Object.entries(important_events_list)) {
         var button = document.createElement("input");
         button.type = "button";
-        button.value = truncateString(event);
+        button.value = formatString(event);
         button.className = "event_tiles";
         (function(index){
         button.addEventListener("click", function() {
             zingchart.exec('time_sentiment_cases_plot', 'setguide', {
             graphid:0,
-            keyvalue: startUTC + 24 * 3600000 * index
+            keyvalue: <%=firstDayUTC%> + 24 * 3600000 * index
             });
         })
         })(time)
         var ie = document.getElementById("'important_events'");
         ie.appendChild(button);
     }
-    var sentiments = {
-    "positive":[30,60,1],
-    "neutral":[41,23,5],
-    "negative":[32,55,8]};
     var plotConfig = 
             {
                 "type": "mixed",
                 "utc": true,
+                "timezone": +8,
                 "title": {
                     "text": "Sentiments over time",
                     "font-size": "24px",
                     "adjust-layout":true
                 },
                 "plotarea": {
-                    "margin": "dynamic 45 60 dynamic",
+                    // "margin": "dynamic 45 60 dynamic",
+                    "marginLeft":'dynamic',
+                    "marginRight":'dynamic'
                 },
                 "legend": {
                     "layout": "float",
@@ -167,7 +153,7 @@
                         }
                     },
                     "label": {
-                        "visible": false
+                        "visible": true
                     },
                     "minor-ticks": 0
                 },
@@ -178,10 +164,25 @@
                         "line-style": "dashed"
                     },
                     "label": {
-                        // "text": "Page Views",
+                        "text": "Confirmed Cases",
+                        "font-size":"20vw"
                     },
                     "minor-ticks": 0,
                     "thousands-separator": ","
+                },
+                "scaleY2": {
+                    "line-color": "#f6f7f8",
+                    "shadow": 0,
+                    "guide": {
+                        "line-style": "dashed"
+                    },
+                    "label": {
+                    "text": 'Sentiments',
+                    "font-size":"20vw"
+                    },
+                    "minor-ticks": 0,
+                    "thousands-separator": ",",
+                    short: true
                 },
                 "crosshair-x": {
                     "line-color": "#efefef",
@@ -222,8 +223,9 @@
                 "series": [
                     {
                         "values": cases,
+                        "scales": 'scale-x, scale-y',
                         "type": "line",
-                        "text": "Total Cases",
+                        "text": "Confirmed Cases",
                         "line-color": "#007790",
                         "legend-item":{
                           "background-color": "#007790",
@@ -245,10 +247,15 @@
                         }
                     },  
                     {
-                        "values": sentiments["negative"],
+                        "values": [
+                                    <% sentiments["negative"].forEach(element => { %>
+                                        <%=element%>,
+                                    <% }); %>
+                                    ],
+                        "scales": 'scale-x, scale-y-2',
                         "stacked":true,
                         "type": "bar",
-                        "text": "Negative",
+                        "text": "Negative Sentiment",
                         "line-color": "#da534d",
                         "legend-item":{
                           "background-color": "#da534d",
@@ -269,38 +276,48 @@
                           "background-color": "#da534d",
                         }
                     },
+                    // {
+                    //     "values": [
+                    //                 <% sentiments["neutral"].forEach(element => { %>
+                    //                     <%=element%>,
+                    //                 <% }); %>
+                    //                 ],
+                    //     "scales": 'scale-x, scale-y-2',
+                    //     "stacked":true,
+                    //     "type": "bar",
+                    //     "backgroundColor" : "orange",
+                    //     "text": "Neutral",
+                    //     "line-color": "orange",
+                    //     "legend-item":{
+                    //       "background-color": "orange",
+                    //       "borderRadius":5,
+                    //       "font-color":"white"
+                    //     },
+                    //     "legend-marker": {
+                    //         "visible":false
+                    //     },
+                    //     "marker": {
+                    //         "background-color": "#DDBF00",
+                    //         "border-width": 1,
+                    //         "shadow": 0,
+                    //         "border-color": "#DDBF00"
+                    //     },
+                    //     "highlight-marker":{
+                    //       "size":6,
+                    //       "background-color": "#DDBF00",
+                    //     }
+                    // },
                     {
-                        "values": sentiments["neutral"],
-                        "stacked":true,
-                        "type": "bar",
-                        "backgroundColor" : "orange",
-                        "text": "Neutral",
-                        "line-color": "orange",
-                        "legend-item":{
-                          "background-color": "orange",
-                          "borderRadius":5,
-                          "font-color":"white"
-                        },
-                        "legend-marker": {
-                            "visible":false
-                        },
-                        "marker": {
-                            "background-color": "#DDBF00",
-                            "border-width": 1,
-                            "shadow": 0,
-                            "border-color": "#DDBF00"
-                        },
-                        "highlight-marker":{
-                          "size":6,
-                          "background-color": "#DDBF00",
-                        }
-                    },
-                    {
-                        "values": sentiments["positive"],
+                        "values": [
+                                    <% sentiments["positive"].forEach(element => { %>
+                                        <%=element%>,
+                                    <% }); %>
+                                    ],
+                        "scales": 'scale-x, scale-y-2',
                         "stacked":true,
                         "type": "bar",
                         "backgroundColor" : "green",
-                        "text": "Positive",
+                        "text": "Positive Sentiment",
                         "line-color": "orange",
                         "legend-item":{
                           "background-color": "green",
