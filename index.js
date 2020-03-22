@@ -14,8 +14,8 @@ const port = 80;
 const maxlen = 100;
 // const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
 
-let buf = ["Msg1", "Msg2", "Msg3"];
-let writeidx = 3;
+let buf = ["No messages yet!"];
+let writeidx = 0;
 
 app.get('/', function(req, res){
   var data = {
@@ -125,6 +125,7 @@ app.get('/timeline', function(req, res){
     if (i.toString() in news) {
       for (var j = 0; j < news[i.toString()].length; j ++) { //for every news in that day, retrieve total sentiment
         var love = 0; var wow = 0; var like = 0; var haha = 0; var sad = 0; var angry = 0;
+        // bruh
         if ('Love' in data['reactions'][(news[i.toString()][j]).toString()]) {
           love = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Love']);
         } if ('Wow' in data['reactions'][(news[i.toString()][j]).toString()]) {
