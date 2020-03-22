@@ -76,9 +76,9 @@
     function formatString(str) {
     num = 150;
     if (str.length <= num) {
-      return str.replace("&#39","'").replace(";","");
+      return str.replace("+","'");
     }
-    return str.replace("&#39","'").replace(";","").slice(0, num) + '...';
+    return str.replace("+","'").slice(0, num) + '...';
     }
     fetch("https://pomber.github.io/covid19/timeseries.json").then(response => response.json())
     .then(data => {
@@ -87,7 +87,7 @@
     for (var i = 1 + <%=startDay %>; i < len; i++) {
         cases.push(data["Singapore"][i]["confirmed"]);
     }
-    var important_events_list = { 
+    var important_events_list = {
         <% Object.keys(events).forEach(function(key) { %>
        "<%= key %>": <%= events[key] %>,
         <% }); %>
@@ -112,6 +112,7 @@
             {
                 "type": "mixed",
                 "utc": true,
+                "timezone": +8,
                 "title": {
                     "text": "Sentiments over time",
                     "font-size": "24px",
