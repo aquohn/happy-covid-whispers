@@ -93,19 +93,18 @@ app.post('/postquote', function(req, res){
   /* quote += " _#Covid_19"; */
   res.sendFile(__dirname + "/views/thankyou.html");
 })
-
 app.get('/timeline', function(req, res){
-  const important_event_cutoff = 400;
-  const startUTC = 1579741200000; //starting UTC value of timeline
-  
-  const firstDayUTC = 1579741200000;
+  request('http://f330e25c.ngrok.io/overall', function(err, response, body) {
+    var data = JSON.parse(body);
+  const important_event_cutoff = 0;
+  // const startUTC = 1579712400000; //23 jan 
+  const startUTC = 1584032400000;//13th march
+  const firstDayUTC = 1579712400000;//23 jan 
   const dayConst = 24 * 3600000;
   const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
-  let rawdata = fs.readFileSync('./sample.json');
-  let data = JSON.parse(rawdata);
   let news = {};
-  for ([post_index, utc] of Object.entries(data['date'])) {
-    dayNumber = Math.floor((utc - firstDayUTC) /dayConst).toString()
+  for ([post_index, utcx] of Object.entries(data['date'])) {
+    dayNumber = Math.floor((utcx - firstDayUTC) /dayConst).toString()
     if (!(dayNumber in news)) {
       news[dayNumber] = [post_index];
     } else {
@@ -123,26 +122,11 @@ app.get('/timeline', function(req, res){
     neutral.unshift(0); 
     negative.unshift(0);
     if (i.toString() in news) {
-      for (var j = 0; j < news[i.toString()].length; j ++) { //for every news in that day, retrieve total sentiment
-        var love = 0; var wow = 0; var like = 0; var haha = 0; var sad = 0; var angry = 0;
-        // bruh
-        if ('Love' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          love = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Love']);
-        } if ('Wow' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          wow = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Wow']);
-        } if ('Like' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          like = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Like']);
-        } if ('Haha' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          haha = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Haha']);
-        } if ('Sad' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          sad = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Sad']);
-        } if ('Angry' in data['reactions'][(news[i.toString()][j]).toString()]) {
-          angry = parseInt(data['reactions'][(news[i.toString()][j]).toString()]['Angry']);
-        }
-        positive[0] += love + haha;
-        neutral[0] += like + wow;
-        negative[0] += sad + angry;
-        if (love + wow + like + haha + sad + angry > important_event_cutoff) {
+      for (var j = 0; j < news[i.toString()].length; j ++) { 
+        positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
+        neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
+        negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
+        if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) { 
           important_events[(data['title'][(news[i.toString()][j]).toString()])] = i;
         }
       }
@@ -154,8 +138,9 @@ app.get('/timeline', function(req, res){
      events: important_events,
      startUTC: startUTC,
      startDay: startDay,
-     firstDayUTC: firstDayUTC
+     firstDayUTC: firstDayUTC,
   });
+})
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
