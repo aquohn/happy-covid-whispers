@@ -19,28 +19,78 @@ let buf = ["No message yet!"];
 let writeidx = 0;
 
 app.get('/', function(req, res){
-  var data = {
-    overall: 0.6,
-    breakdown: [30, 20, 50], //positive, neutral, negative
-    healthcare: {
-      overall: 0.7,
-      breakdown: [50, 30, 20]
-    },
-    finance: {
-      overall: 0.3,
-      breakdown: [10, 30, 60]
-    },
-    education: {
-      overall: 0.5,
-      breakdown: [30, 10, 60]
+  request('http://f330e25c.ngrok.io/aggregate', function(err, response, body) {
+    var body = JSON.parse(body);
+    var overallTotal = body["overall"]["counts"]["negative"] + body["overall"]["counts"]["neutral"] + body["overall"]["counts"]["positive"];
+    var healthTotal = body["health"]["counts"]["negative"] + body["health"]["counts"]["neutral"] + body["health"]["counts"]["positive"];
+    var othersTotal = body["others"]["counts"]["negative"] + body["others"]["counts"]["neutral"] + body["others"]["counts"]["positive"];
+    var manpowerTotal = body["manpower"]["counts"]["negative"] + body["manpower"]["counts"]["neutral"] + body["manpower"]["counts"]["positive"];
+    var data = {
+      overall: (body["overall"]["sentiment"]).toFixed(1),
+      breakdown: [((body["overall"]["counts"]["positive"]/overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["neutral"]/overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["negative"]/overallTotal) * 100).toFixed(1)], //positive, neutral, negative
+      healthcare: {
+        overall: (body["health"]["sentiment"]).toFixed(1),
+        breakdown: [((body["health"]["counts"]["positive"]/healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["neutral"]/healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["negative"]/healthTotal) * 100).toFixed(1)], //positive, neutral, negative
+      },
+      manpower: {
+        overall: (body["manpower"]["sentiment"]).toFixed(1),
+        breakdown: [((body["manpower"]["counts"]["positive"]/manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["neutral"]/manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["negative"]/manpowerTotal) * 100).toFixed(1)], //positive, neutral, negative
+      },
+      education: {
+        overall: (body["others"]["sentiment"]).toFixed(1),
+        breakdown: [((body["others"]["counts"]["positive"]/othersTotal) * 100).toFixed(1), ((body["others"]["counts"]["neutral"]/othersTotal) * 100).toFixed(1), ((body["others"]["counts"]["negative"]/othersTotal) * 100).toFixed(1)], //positive, neutral, negative
+      }
     }
-  }
-  res.render("\index", {
-    data: data
-  });
+    console.log(data);
+    res.render("\index", {
+      data: data
+    });
+  })
 })
 
 app.get('/articles', function( req, res){
+  request("http://f330e25c.ngrok.io/overall", function(err, response, body) {
+    var body = JSON.parse(body);
+    //-----------function for arranging everything------------------------------
+    var data = [];
+    var c = 0;
+    Object.keys(body["title"]).forEach(function(key) {
+      c++;
+      var totalCount = body["counts"][key]["positive"] + body["counts"][key]["neutral"] + body["counts"][key]["negative"];
+      var d = new Date(body["date"][key]);
+      var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      var datestring = days[d.getDay()] + ", " + d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
+      var article = {
+        "title": body["title"][key],
+        "date" : datestring,
+        "url" : body["url"][key],
+        "summary" : body["summary"][key],
+        "sentiment" : (body["sentiment"][key]).toFixed(1),
+        "breakdown" : {
+          "positive" : Math.round((body["counts"][key]["positive"]) / totalCount * 100),
+          "neutral" : Math.round((body["counts"][key]["neutral"]) / totalCount * 100),
+          "negative" : Math.round((body["counts"][key]["negative"]) / totalCount * 100),
+        },
+        "wordcloud" : body["comments"][key]
+      };
+      data.push([body["date"][key], article]);
+    })
+    data.sort();
+    var jsonData = {};
+    for (var i = 0; i < data.length; i++) {
+      jsonData[i] = data[i][1];
+      console.log(jsonData[i]["wordcloud"]);
+    }
+    // console.log(jsonData);
+    //--------------------------------------------------------------------------
+    var prev = 0;
+    res.render("\articles.ejs", {
+      data: jsonData,
+      onclick: "test()",
+      prev: prev
+    });
+  })
+  /*
   let rawdata = fs.readFileSync('./sample.json');
   let data = JSON.parse(rawdata);
   var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -49,11 +99,11 @@ app.get('/articles', function( req, res){
     data["date"][i] = days[d.getDay()] + ", " + d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
   }
   var prev = 0;
-  res.render("\articles.ejs", {
-    data: data,
-    onclick: "test()",
-    prev: prev
-  });
+  */
+})
+
+app.get('/aboutUs', function(req, res) {
+  res.render("\aboutUs.ejs");
 })
 
 app.get('/pi', function(req, res){

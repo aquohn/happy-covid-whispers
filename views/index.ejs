@@ -122,16 +122,16 @@
               </tr>
               <tr>
                 <td colspan="2">
-                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: orange">monetization_on</i> Finance </h1>
+                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: orange">monetization_on</i> manpower </h1>
                 </td>
               </tr>
               <tr>
                 <td style="display: inline-block;">
-                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.finance.overall %></h2><h2 class = "smalltext"></h2></br>
-                  <h1 style="margin-left: 30px;" class = "smalltext" id = "financeOverall"></h1>
+                  <h2 style="margin-left: 30px;"class = "bigNumber"><%= data.manpower.overall %></h2><h2 class = "smalltext"></h2></br>
+                  <h1 style="margin-left: 30px;" class = "smalltext" id = "manpowerOverall"></h1>
                 </td>
                 <td>
-                  <div id = "financeBreakdownChart" class = "chart"></div>
+                  <div id = "manpowerBreakdownChart" class = "chart"></div>
                 </td>
               </tr>
               <tr>
@@ -254,16 +254,16 @@
         healthLevel.innerHTML = "Neutral";
         healthLevel.style.color = "#e6ac00";
       }
-      var financeLevel = document.getElementById("financeOverall");
-      if (<%= data.finance.overall %> < -0.3) {
-        financeLevel.innerHTML = "Negative";
-        financeLevel.style.color = "orangered"
-      } else if (<%= data.finance.overall %> > 0.3) {
-        financeLevel.innerHTML = "Positive";
-        financeLevel.style.color = "green";
+      var manpowerLevel = document.getElementById("manpowerOverall");
+      if (<%= data.manpower.overall %> < -0.3) {
+        manpowerLevel.innerHTML = "Negative";
+        manpowerLevel.style.color = "orangered"
+      } else if (<%= data.manpower.overall %> > 0.3) {
+        manpowerLevel.innerHTML = "Positive";
+        manpowerLevel.style.color = "green";
       } else {
-        financeLevel.innerHTML = "Neutral";
-        financeLevel.style.color = "#e6ac00";
+        manpowerLevel.innerHTML = "Neutral";
+        manpowerLevel.style.color = "#e6ac00";
       }
       var educationLevel = document.getElementById("educationOverall");
       if (<%= data.education.overall %> < -0.3) {
@@ -393,7 +393,7 @@ series: [
 
 ]
 }
-const financeBreakdownConfig = {
+const manpowerBreakdownConfig = {
 type: "ring",
 "plotarea" : {
 "x" : 10,
@@ -408,13 +408,13 @@ plot: {
 },
 series: [
 {
-  values: [<%= data.finance.breakdown[2] %>], //negative
+  values: [<%= data.manpower.breakdown[2] %>], //negative
   'background-color': 'orangered'
 }, {
-  values: [<%= data.finance.breakdown[1] %>], //neutral
+  values: [<%= data.manpower.breakdown[1] %>], //neutral
   'background-color': '#e6ac00'
 }, {
-  values: [<%= data.finance.breakdown[0] %>], //good
+  values: [<%= data.manpower.breakdown[0] %>], //good
   'background-color': 'green'
 }
 
@@ -466,8 +466,8 @@ series: [
       height: 130
   });
   zingchart.render({
-      id : 'financeBreakdownChart',
-      data : financeBreakdownConfig,
+      id : 'manpowerBreakdownChart',
+      data : manpowerBreakdownConfig,
       width: 150,
       height: 130
   });
