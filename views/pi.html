@@ -36,6 +36,32 @@
       text-align: center;
       font-family: "Open Sans", sans-serif;
     }
+
+    #cycle {
+      animation-duration: 1s;
+      animation-iteration-count: 0;
+      display: inline-block;
+    }
+    @keyframes fadeOut {
+      from {
+        opacity: 100%;
+        transform: scale(1) translate(0, 0);
+      }
+      to {
+        opacity: 0%;
+        transform: scale(0.9) translate(0, 3vh);
+      }
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0%;
+        transform: scale(0.9) translate(0, -3vh);
+      }
+      to {
+        opacity: 100%;
+        transform: scale(1) translate(0, 0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -56,28 +82,29 @@
   </div>
 </body>
 <script>
-    const CYCLE_TIME = 5 * 1000; // 10 seconds
-    let idx = 0;
-    function cycleFunc() {
-      let xhttp = new XMLHttpRequest();
-      let cycleElem = document.getElementById("cycle");
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) { // fetching new msg succeeded
-          let initPos = cycleElem.style.top;
-          let pos = initPos;
-          //let cycleAnimation = setInterval(frame, 10);
-          function frame() {
-            
-          }
-          let msg = JSON.parse(this.responseText);
-          document.getElementById("cycle").innerHTML = msg.text;
+  const CYCLE_TIME = 5 * 1000; // 10 seconds
+  let idx = 0;
+  function cycleFunc() {
+    let xhttp = new XMLHttpRequest();
+    let cycleElem = document.getElementById("cycle");
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) { // fetching new msg succeeded
+        let msg = JSON.parse(this.responseText);
+        //alert(this.responseText);
+        cycleElem.style.animationName = "fadeOut";
+        cycleElem.style.animationIterationCount = "1";
+        setTimeout(function() {
+          cycleElem.innerHTML = msg.text;
           idx = (idx + 1) % msg.currlen;
-        }
+          cycleElem.style.animationName = "fadeIn";
+          cycleElem.style.animationIterationCount = "1";
+        }, 950); // offset to prevent animation stuttering
       }
-      xhttp.open("GET", "/nextquote?idx=" + idx, true);
-      xhttp.send();
     }
+    xhttp.open("GET", "/nextquote?idx=" + idx, true);
+    xhttp.send();
+    setTimeout(cycleFunc, CYCLE_TIME);
+  }
 
-    cycleFunc(); // why doesn't this fire once before the interval begins?
-    setInterval(cycleFunc, CYCLE_TIME);
-  </script>
+  cycleFunc(); 
+</script>

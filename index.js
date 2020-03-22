@@ -3,7 +3,6 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 const https = require("https");
 const partials = require("express-partials");
-const request = require("request");
 const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -15,8 +14,7 @@ const port = 80;
 const maxlen = 100;
 // const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
 
-//let buf = ["No message yet!"];
-let buf = ["No messages yet!"];
+let buf = ["Msg1", "Msg2", "Msg3"];
 let writeidx = 3;
 
 app.get('/', function(req, res){
@@ -72,11 +70,15 @@ app.get('/thankyou', function(req, res){
 app.get('/nextquote', function(req, res){
   let currlen = buf.length;
   idx = parseInt(req.query.idx);
-  if (idx === NaN) {
+  if (!idx) { // default for all falsy values
     idx = 0;
   }
+  let text = buf[idx];
+  if (!text) {
+    text = "Loading..."; // yes this is very hacky
+  }
   res.send({
-    text: buf[idx],
+    text: text,
     currlen: currlen.toString()
   });
 })
