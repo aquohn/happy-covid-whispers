@@ -107,7 +107,11 @@
       document.getElementById("link").href ="<%= data[i]["url"] %>";
       document.getElementById("summaryText").innerHTML ="<%= data[i]["summary"] %>";
       document.getElementById("sentimentLevel").innerHTML ="<%= data[i]["sentiment"] %>";
-
+      var desc = <%= data[i]["sentiment"] %> < -0.2 ? "Negative" : <%= data[i]["sentiment"] %> > 0.2 ? "Positive" : "Neutral";
+      document.getElementById("overallDesc").innerHTML = desc;
+      document.getElementById("bPos").innerHTML = "<%= data[i]["breakdown"]["positive"] %>";
+      document.getElementById("bNeg").innerHTML = "<%= data[i]["breakdown"]["negative"] %>";
+      document.getElementById("bNeu").innerHTML = "<%= data[i]["breakdown"]["neutral"] %>";
     })(); test(<%= i %>)'>
     <h3 class = 'title'><%= data[i]['title'] %></h3>
     <h5 class = 'date'><%= data[i]['date'] %>, Sentiment: <%= data[i]['sentiment'] %></h5>
@@ -153,15 +157,15 @@
                 <table>
                   <tr>
                     <td>
-                      <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: <%= data[prev]["breakdown"]["positive"] %>%</h1>
+                      <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: <span id = "bPos"><%= data[prev]["breakdown"]["positive"] %><span>%</h1>
                     </td>
                   </tr>
                     <tr>
-                      <td><h1 class = "smalltext" style = "color: #e6ac00"><i class="material-icons">  sentiment_satisfied</i> Neutral: <%= data[prev]["breakdown"]["neutral"] %>%</h1>
+                      <td><h1 class = "smalltext" style = "color: #e6ac00"><i class="material-icons">  sentiment_satisfied</i> Neutral: <span id = "bNeu"><%= data[prev]["breakdown"]["neutral"] %></span>%</h1>
                       </td>
                     </tr>
                       <tr>
-                        <td><h1 class = "smalltext" style = "color: orangered"><i class="material-icons">sentiment_very_dissatisfied</i> Negative: <%= data[prev]["breakdown"]["negative"] %>%</h1>
+                        <td><h1 class = "smalltext" style = "color: orangered"><i class="material-icons">sentiment_very_dissatisfied</i> Negative: <span id = "bNeg"><%= data[prev]["breakdown"]["negative"] %></span>%</h1>
                         </td>
                       </tr>
                 </table>
@@ -171,45 +175,149 @@
         </div>
         <div display>
           <h3 class = 'title'>Word Cloud</h3>
-          <div id = "wordcloud" style="width: 1000px; margin: auto;"></div>
+          <div id = "wordclouderr" style="width: 1000px; margin: auto;"><span class = "smalltext">Sorry, word cloud is currently unavailable! Please come back later</span></div>
         </div>
   </div>
   <script>
     var curr = 0;
     var sentiments = [];
-    var breakdown = [];
+    var breakdownPos = [];
+    var breakdownNeg = [];
+    var breakdownNeu = [];
     var wordcloud = [];
     (function(){
       <% for (var i = 0; i < Object.keys(data).length; i++){ %>
-        sentiments.push("<%= data[i]["sentiment"] %>");
-        breakdown.push("<%= data[i]["breakdown"] %>")
-        var wc = "<%= data[i]["wordcloud"] %>";
-        wc.replace(/&#39;/g, " ");
-        var arr = wc.split(",");
-        for (var j = 0; j < arr.length; j+= 2) {
-          var pair = {
-            text: arr[j],
-            count: arr[j+1]
-          }
-          wordcloud.push(pair);
-        }
-        console.log(wordcloud);
+        sentiments.push(<%= data[i]["sentiment"] %>);
+        breakdownPos.push(<%= data[i]["breakdown"]["positive"] %>)
+        breakdownNeg.push(<%= data[i]["breakdown"]["negative"] %>)
+        breakdownNeu.push(<%= data[i]["breakdown"]["neutral"] %>)
       <% } %>
       var div = document.getElementById('0');
      div.classList.add('articleboxclick');
      div.classList.remove('articlebox');
+     var level = document.getElementById("overallDesc");
+     if (<%= data[prev]["sentiment"] %> < -0.3) {
+       level.innerHTML = "Negative";
+     } else if (<%= data[prev]["sentiment"] %> > 0.3) {
+       level.innerHTML = "Positive";
+     } else {
+       level.innerHTML = "Neutral";
+     }
+     var overallConfig = {
+       type: 'gauge',
+       "plotarea":{
+         "y": 60
+    },
+       scale: {
+         'size-factor': 1.4
+       },
+       'scale-r': {
+         aperture: 200,
+         values: "-1:1:0.1",
+         center: {
+           visible: false
+         },
+         ring: {
+           size: 10,
+           rules: [
+             {
+               rule: "%v < -0.3",
+               'background-color': "orangered"
+             }, {
+               rule: "%v >= -0.3 && %v <= 0.3",
+               'background-color': "#e6ac00"
+             }, {
+               rule: "%v >= 0.3 && %v <= 1.0",
+               'background-color': 'green'
+             }
+           ]
+         }
+       },
+       plot: {
+         csize: "5%",
+         size: "80%",
+         'background-color': "#000000",
+         'value-box': { //Value Boxes
+           placement: "center",  //Specify placement at "center", "tip", or "edge".
+           visible: false,
+           text: "%v",
+           fontSize: 25,
+           'font-color': "black",
+           rules: [
+             {
+               rule: "%v < -0.3",
+               text: "%v<br>Negative",
+               'font-color': 'orangered'
+             }, {
+               rule: "%v >= -0.3 && %v <= 0.3",
+               text: "%v<br>Neutral",
+               'font-color': '#e6ac00'
+             },{
+               rule: "%v > 0.3",
+               text: "%v<br>Positive",
+               'font-color': 'green'
+             },
+           ]
+         }
+       },
+       series: [{
+         values: [<%= data[0]["sentiment"] %>],
+         indicator: [3, 0, 0, 0, 0],
+         "csize": "5"
+       }]
+     }
+     var breakdownConfig = {
+   type: "ring",
+   "plotarea" : {
+     "y" : 20
+   },
+   plot: {
+     slice: 0.7,
+     'value-box': {
+       visible: false
+     }
+   },
+   series: [
+     {
+       values: [<%= data[0]["breakdown"]["negative"] %>], //negative
+       'background-color': 'orangered'
+     }, {
+       values: [<%= data[0]["breakdown"]["neutral"] %>], //neutral
+       'background-color': '#e6ac00'
+     }, {
+       values: [<%= data[0]["breakdown"]["positive"] %>], //good
+       'background-color': 'green'
+     }
 
-     // var level = document.getElementById("overallDesc");
-     // if (<%= data[prev]["sentiment"] %> < -0.3) {
-     //   level.innerHTML = "Negative";
-     //   level.style.color = "orangered"
-     // } else if (<%= data[prev]["sentiment"] %> > 0.3) {
-     //   level.innerHTML = "Positive";
-     //   level.style.color = "green";
-     // } else {
-     //   level.innerHTML = "Neutral";
-     //   level.style.color = "#e6ac00";
-     // }
+   ]
+ }
+ var wordcloudConfig = {
+   type: "wordcloud",
+   options: {
+     text: "<%= data[0]['summary'] %>",
+     minLength: 5,
+     maxItems: 10,
+     aspect: "flow-center"
+   }
+ }
+     zingchart.render({
+           id : 'sentiment',
+           data : overallConfig,
+           width: 300,
+           height: 200,
+     });
+     zingchart.render({
+           id : 'breakdown',
+           data : breakdownConfig,
+           width: 200,
+           height: 200,
+     });
+     zingchart.render({
+  id: 'wordcloud',
+  data: wordcloudConfig,
+  height: 150,
+  width: '100%'
+ });
     })();
 
     function test(i) {
@@ -219,7 +327,10 @@
       prev.classList.add('articlebox');
       div.classList.add('articleboxclick');
       curr = i;
-      const overallConfig = {
+      console.log(breakdownPos[i]);
+      console.log(breakdownNeg[i]);
+      console.log(breakdownNeu[i]);
+      let overallConfig = {
         type: 'gauge',
         "plotarea":{
           "y": 60
@@ -277,12 +388,12 @@
           }
         },
         series: [{
-          values: [<%= data[1]["sentiment"] %>],
+          values: [sentiments[i]],
           indicator: [3, 0, 0, 0, 0],
           "csize": "5"
         }]
       }
-      const breakdownConfig = {
+      var breakdownConfig = {
     type: "ring",
     "plotarea" : {
       "y" : 20
@@ -295,27 +406,19 @@
     },
     series: [
       {
-        values: [<%= data[1]["breakdown"]["negative"] %>], //negative
+        values: [breakdownNeg[i]], //negative
         'background-color': 'orangered'
       }, {
-        values: [<%= data[1]["breakdown"]["neutral"] %>], //neutral
+        values: [breakdownNeu[i]], //neutral
         'background-color': '#e6ac00'
       }, {
-        values: [<%= data[1]["breakdown"]["positive"] %>], //good
+        values: [breakdownPos[i]], //good
         'background-color': 'green'
       }
 
     ]
   }
-  var wordcloudConfig = {
-    type: "wordcloud",
-    options: {
-      text: "<%= data[1]['summary'] %>",
-      minLength: 5,
-      maxItems: 10,
-      aspect: "flow-center"
-    }
-  }
+  zingchart.exec('sentiment', 'destroy');
       zingchart.render({
             id : 'sentiment',
             data : overallConfig,
@@ -328,128 +431,8 @@
             width: 200,
             height: 200,
       });
-      zingchart.render({
-  	id: 'wordcloud',
-  	data: wordcloudConfig,
-  	height: 150,
-  	width: '100%'
-  });
-    }
-
-    const overallConfig = {
-      type: 'gauge',
-      "plotarea":{
-        "y": 60
-   },
-      scale: {
-        'size-factor': 1.4
-      },
-      'scale-r': {
-        aperture: 200,
-        values: "-1:1:0.1",
-        center: {
-          visible: false
-        },
-        ring: {
-          size: 10,
-          rules: [
-            {
-              rule: "%v < -0.3",
-              'background-color': "orangered"
-            }, {
-              rule: "%v >= -0.3 && %v <= 0.3",
-              'background-color': "#e6ac00"
-            }, {
-              rule: "%v >= 0.3 && %v <= 1.0",
-              'background-color': 'green'
-            }
-          ]
-        }
-      },
-      plot: {
-        csize: "5%",
-        size: "80%",
-        'background-color': "#000000",
-        'value-box': { //Value Boxes
-          placement: "center",  //Specify placement at "center", "tip", or "edge".
-          visible: false,
-          text: "%v",
-          fontSize: 25,
-          'font-color': "black",
-          rules: [
-            {
-              rule: "%v < -0.3",
-              text: "%v<br>Negative",
-              'font-color': 'orangered'
-            }, {
-              rule: "%v >= -0.3 && %v <= 0.3",
-              text: "%v<br>Neutral",
-              'font-color': '#e6ac00'
-            },{
-              rule: "%v > 0.3",
-              text: "%v<br>Positive",
-              'font-color': 'green'
-            },
-          ]
-        }
-      },
-      series: [{
-        values: [<%= data[0]["sentiment"] %>],
-        indicator: [3, 0, 0, 0, 0],
-        "csize": "5"
-      }]
-    }
-    const breakdownConfig = {
-  type: "ring",
-  "plotarea" : {
-    "y" : 20
-  },
-  plot: {
-    slice: 0.7,
-    'value-box': {
-      visible: false
-    }
-  },
-  series: [
-    {
-      values: [<%= data[0]["breakdown"]["negative"] %>], //negative
-      'background-color': 'orangered'
-    }, {
-      values: [<%= data[0]["breakdown"]["neutral"] %>], //neutral
-      'background-color': '#e6ac00'
-    }, {
-      values: [<%= data[0]["breakdown"]["positive"] %>], //good
-      'background-color': 'green'
-    }
-
-  ]
-}
-var wordcloudConfig = {
-  type: "wordcloud",
-  options: {
-    text: "<%= data[0]['summary'] %>",
-    minLength: 5,
-    maxItems: 10,
-    aspect: "flow-center"
   }
-}
-    zingchart.render({
-          id : 'sentiment',
-          data : overallConfig,
-          width: 300,
-          height: 200,
-    });
-    zingchart.render({
-          id : 'breakdown',
-          data : breakdownConfig,
-          width: 200,
-          height: 200,
-    });
-    zingchart.render({
-	id: 'wordcloud',
-	data: wordcloudConfig,
-	height: 150,
-	width: '100%'
-});
+
+
   </script>
 </body>

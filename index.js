@@ -21,10 +21,11 @@ let writeidx = 0;
 app.get('/covid', function(req, res){
   request('http://35d97685.ap.ngrok.io/aggregate', function(err, response, body) {
     if (body.startsWith("Tunnel")) {
-      console.log("err");
-      res.render("\err.ejs");
+      body = fs.readFileSync('./data/aggregate.json');
+      body =JSON.parse(body);
     } else {
-    var body = JSON.parse(body);
+      body = JSON.parse(body);
+    }
     var overallTotal = body["overall"]["counts"]["negative"] + body["overall"]["counts"]["neutral"] + body["overall"]["counts"]["positive"];
     var healthTotal = body["health"]["counts"]["negative"] + body["health"]["counts"]["neutral"] + body["health"]["counts"]["positive"];
     var othersTotal = body["others"]["counts"]["negative"] + body["others"]["counts"]["neutral"] + body["others"]["counts"]["positive"];
@@ -49,16 +50,17 @@ app.get('/covid', function(req, res){
     res.render("\index", {
       data: data
     });
-  }
   })
 })
 
 app.get('/articles', function( req, res){
   request("http://35d97685.ap.ngrok.io/overall", function(err, response, body) {
     if (body.startsWith("Tunnel")) {
-      res.render("\err.ejs");
+      body = fs.readFileSync('./data/proc_data.json');
+      body = JSON.parse(body);
     } else {
     var body = JSON.parse(body);
+  }
     //-----------function for arranging everything------------------------------
     var data = [];
     var c = 0;
@@ -97,7 +99,6 @@ app.get('/articles', function( req, res){
       onclick: "test()",
       prev: prev
     });
-  }
   })
   /*
   let rawdata = fs.readFileSync('./sample.json');
@@ -170,57 +171,59 @@ app.post('/postquote', function(req, res){
 
 app.get('/timeline', function(req, res){
   request('http://35d97685.ap.ngrok.io/overall', function(err, response, body) {
+    var data;
     if (body.startsWith("Tunnel")) {
-      res.render("\err.ejs");
-      return;
+      body = fs.readFileSync('./data/proc_data.json');
+      data = JSON.parse(body);
     } else {
-    var data = JSON.parse(body);
-  const important_event_cutoff = 0;
-  // const startUTC = 1579712400000; //23 jan
-  const startUTC = 1584032400000;//13th march
-  const firstDayUTC = 1579712400000;//23 jan
-  const dayConst = 24 * 3600000;
-  const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
-  let news = {};
-  for ([post_index, utcx] of Object.entries(data['date'])) {
-    dayNumber = Math.floor((utcx - firstDayUTC) /dayConst).toString()
-    if (!(dayNumber in news)) {
-      news[dayNumber] = [post_index];
-    } else {
-      news[dayNumber].push(post_index);
-    }
+      data = JSON.parse(body);
   }
-  var d = new Date();
-  var currentDay = Math.floor((d.getTime() - firstDayUTC) / dayConst);
-  let positive = [];
-  let neutral = [];
-  let negative = [];
-  let important_events = {};
-  for (var i = currentDay; i >= startDay; i --) { //i number of days since strike (day 1)
-    positive.unshift(0);
-    neutral.unshift(0);
-    negative.unshift(0);
-    if (i.toString() in news) {
-      for (var j = 0; j < news[i.toString()].length; j ++) {
-        positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
-        neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
-        negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
-        if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) {
-          important_events[(data['title'][(news[i.toString()][j]).toString()])] = i;
+  const important_event_cutoff = 0;
+    // const startUTC = 1579712400000; //23 jan
+    const startUTC = 1584032400000;//13th march
+    const firstDayUTC = 1579712400000;//23 jan
+    const dayConst = 24 * 3600000;
+    const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
+    let news = {};
+    for ([post_index, utcx] of Object.entries(data['date'])) {
+      dayNumber = Math.floor((utcx - firstDayUTC) /dayConst).toString()
+      if (!(dayNumber in news)) {
+        news[dayNumber] = [post_index];
+      } else {
+        news[dayNumber].push(post_index);
+      }
+    }
+    var d = new Date();
+    var currentDay = Math.floor((d.getTime() - firstDayUTC) / dayConst);
+    let positive = [];
+    let neutral = [];
+    let negative = [];
+    let important_events = {};
+    for (var i = currentDay; i >= startDay; i --) { //i number of days since strike (day 1)
+      positive.unshift(0);
+      neutral.unshift(0);
+      negative.unshift(0);
+      if (i.toString() in news) {
+        for (var j = 0; j < news[i.toString()].length; j ++) {
+          positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
+          neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
+          negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
+          if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) {
+            important_events[(data['title'][(news[i.toString()][j]).toString()])] = i;
+          }
         }
       }
     }
-  }
-  let sentiments = {'positive':positive, 'neutral':neutral, 'negative':negative};
-  res.render("timeline", {
-     sentiments: sentiments,
-     events: important_events,
-     startUTC: startUTC,
-     startDay: startDay,
-     firstDayUTC: firstDayUTC,
-  });
-}
+    let sentiments = {'positive':positive, 'neutral':neutral, 'negative':negative};
+    res.render("timeline", {
+      sentiments: sentiments,
+      events: important_events,
+      startUTC: startUTC,
+      startDay: startDay,
+      firstDayUTC: firstDayUTC,
+    });
+  })
 })
-})
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
