@@ -137,20 +137,10 @@ app.get('/nextquote', function(req, res){
 
 app.post('/postquote', function(req, res){
   let quote = req.body.quote;
-  const ESC_MAP = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    "/": '&#x2F;',
-    "`": '&grave;'
-  };
-
-  for (let c in ESC_MAP) {
-    quote = quote.replace(c, ESC_MAP[c]);
+  
+  if (!quote) {
+    quote = "";
   }
-
   buf[writeidx] = quote;
   writeidx = (writeidx + 1) % maxlen;
 
