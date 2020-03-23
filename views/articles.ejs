@@ -106,6 +106,8 @@
       document.getElementById("date").innerHTML ="<%= data[i]["date"] %>";
       document.getElementById("link").href ="<%= data[i]["url"] %>";
       document.getElementById("summaryText").innerHTML ="<%= data[i]["summary"] %>";
+      document.getElementById("sentimentLevel").innerHTML ="<%= data[i]["sentiment"] %>";
+
     })(); test(<%= i %>)'>
     <h3 class = 'title'><%= data[i]['title'] %></h3>
     <h5 class = 'date'><%= data[i]['date'] %>, Sentiment: <%= data[i]['sentiment'] %></h5>
@@ -178,29 +180,36 @@
     var breakdown = [];
     var wordcloud = [];
     (function(){
-      console.log("<%= JSON.stringify(data[0]["wordcloud"]) %>")
       <% for (var i = 0; i < Object.keys(data).length; i++){ %>
         sentiments.push("<%= data[i]["sentiment"] %>");
         breakdown.push("<%= data[i]["breakdown"] %>")
+        var wc = "<%= data[i]["wordcloud"] %>";
+        wc.replace(/&#39;/g, " ");
+        var arr = wc.split(",");
+        for (var j = 0; j < arr.length; j+= 2) {
+          var pair = {
+            text: arr[j],
+            count: arr[j+1]
+          }
+          wordcloud.push(pair);
+        }
+        console.log(wordcloud);
       <% } %>
-      console.log(sentiments);
-      console.log(breakdown);
-      console.log(wordcloud);
       var div = document.getElementById('0');
      div.classList.add('articleboxclick');
      div.classList.remove('articlebox');
 
-     var level = document.getElementById("overallDesc");
-     if (<%= data[prev]["sentiment"] %> < -0.3) {
-       level.innerHTML = "Negative";
-       level.style.color = "orangered"
-     } else if (<%= data[prev]["sentiment"] %> > 0.3) {
-       level.innerHTML = "Positive";
-       level.style.color = "green";
-     } else {
-       level.innerHTML = "Neutral";
-       level.style.color = "#e6ac00";
-     }
+     // var level = document.getElementById("overallDesc");
+     // if (<%= data[prev]["sentiment"] %> < -0.3) {
+     //   level.innerHTML = "Negative";
+     //   level.style.color = "orangered"
+     // } else if (<%= data[prev]["sentiment"] %> > 0.3) {
+     //   level.innerHTML = "Positive";
+     //   level.style.color = "green";
+     // } else {
+     //   level.innerHTML = "Neutral";
+     //   level.style.color = "#e6ac00";
+     // }
     })();
 
     function test(i) {
@@ -210,8 +219,103 @@
       prev.classList.add('articlebox');
       div.classList.add('articleboxclick');
       curr = i;
-      <%- prev -= 2 %>;
-      console.log(<%= prev %>);
+      const overallConfig = {
+        type: 'gauge',
+        "plotarea":{
+          "y": 60
+     },
+        scale: {
+          'size-factor': 1.4
+        },
+        'scale-r': {
+          aperture: 200,
+          values: "-1:1:0.1",
+          center: {
+            visible: false
+          },
+          ring: {
+            size: 10,
+            rules: [
+              {
+                rule: "%v < -0.3",
+                'background-color': "orangered"
+              }, {
+                rule: "%v >= -0.3 && %v <= 0.3",
+                'background-color': "#e6ac00"
+              }, {
+                rule: "%v >= 0.3 && %v <= 1.0",
+                'background-color': 'green'
+              }
+            ]
+          }
+        },
+        plot: {
+          csize: "5%",
+          size: "80%",
+          'background-color': "#000000",
+          'value-box': { //Value Boxes
+            placement: "center",  //Specify placement at "center", "tip", or "edge".
+            visible: false,
+            text: "%v",
+            fontSize: 25,
+            'font-color': "black",
+            rules: [
+              {
+                rule: "%v < -0.3",
+                text: "%v<br>Negative",
+                'font-color': 'orangered'
+              }, {
+                rule: "%v >= -0.3 && %v <= 0.3",
+                text: "%v<br>Neutral",
+                'font-color': '#e6ac00'
+              },{
+                rule: "%v > 0.3",
+                text: "%v<br>Positive",
+                'font-color': 'green'
+              },
+            ]
+          }
+        },
+        series: [{
+          values: [<%= data[1]["sentiment"] %>],
+          indicator: [3, 0, 0, 0, 0],
+          "csize": "5"
+        }]
+      }
+      const breakdownConfig = {
+    type: "ring",
+    "plotarea" : {
+      "y" : 20
+    },
+    plot: {
+      slice: 0.7,
+      'value-box': {
+        visible: false
+      }
+    },
+    series: [
+      {
+        values: [<%= data[1]["breakdown"]["negative"] %>], //negative
+        'background-color': 'orangered'
+      }, {
+        values: [<%= data[1]["breakdown"]["neutral"] %>], //neutral
+        'background-color': '#e6ac00'
+      }, {
+        values: [<%= data[1]["breakdown"]["positive"] %>], //good
+        'background-color': 'green'
+      }
+
+    ]
+  }
+  var wordcloudConfig = {
+    type: "wordcloud",
+    options: {
+      text: "<%= data[1]['summary'] %>",
+      minLength: 5,
+      maxItems: 10,
+      aspect: "flow-center"
+    }
+  }
       zingchart.render({
             id : 'sentiment',
             data : overallConfig,
@@ -224,20 +328,11 @@
             width: 200,
             height: 200,
       });
-      let wordcloudConfig = {
-          type: "wordcloud",
-          options: {
-            text: "rieastnriaestn rsioaetnieosrant",
-            minLength: 5,
-            maxItems: 10,
-            aspect: "flow-center"
-          }
-      }
       zingchart.render({
-    id: 'wordcloud',
-    data: wordcloudConfig,
-    height: 150,
-    width: '100%'
+  	id: 'wordcloud',
+  	data: wordcloudConfig,
+  	height: 150,
+  	width: '100%'
   });
     }
 
@@ -299,7 +394,7 @@
         }
       },
       series: [{
-        values: [0.3],
+        values: [<%= data[0]["sentiment"] %>],
         indicator: [3, 0, 0, 0, 0],
         "csize": "5"
       }]

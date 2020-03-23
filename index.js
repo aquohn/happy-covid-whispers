@@ -18,8 +18,12 @@ const maxlen = 100;
 let buf = ["No messages yet!"];
 let writeidx = 0;
 
-app.get('/', function(req, res){
-  request('http://f330e25c.ngrok.io/aggregate', function(err, response, body) {
+app.get('/covid', function(req, res){
+  request('http://35d97685.ap.ngrok.io/aggregate', function(err, response, body) {
+    if (body.startsWith("Tunnel")) {
+      console.log("err");
+      res.render("\err.ejs");
+    } else {
     var body = JSON.parse(body);
     var overallTotal = body["overall"]["counts"]["negative"] + body["overall"]["counts"]["neutral"] + body["overall"]["counts"]["positive"];
     var healthTotal = body["health"]["counts"]["negative"] + body["health"]["counts"]["neutral"] + body["health"]["counts"]["positive"];
@@ -45,11 +49,15 @@ app.get('/', function(req, res){
     res.render("\index", {
       data: data
     });
+  }
   })
 })
 
 app.get('/articles', function( req, res){
-  request("http://f330e25c.ngrok.io/overall", function(err, response, body) {
+  request("http://35d97685.ap.ngrok.io/overall", function(err, response, body) {
+    if (body.startsWith("Tunnel")) {
+      res.render("\err.ejs");
+    } else {
     var body = JSON.parse(body);
     //-----------function for arranging everything------------------------------
     var data = [];
@@ -89,6 +97,7 @@ app.get('/articles', function( req, res){
       onclick: "test()",
       prev: prev
     });
+  }
   })
   /*
   let rawdata = fs.readFileSync('./sample.json');
@@ -145,12 +154,16 @@ app.post('/postquote', function(req, res){
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 app.get('/timeline', function(req, res){
-  request('http://f330e25c.ngrok.io/overall', function(err, response, body) {
+  request('http://35d97685.ap.ngrok.io/overall', function(err, response, body) {
+    if (body.startsWith("Tunnel")) {
+      res.render("\err.ejs");
+      return;
+    } else {
     var data = JSON.parse(body);
   const important_event_cutoff = 0;
-  // const startUTC = 1579712400000; //23 jan 
+  // const startUTC = 1579712400000; //23 jan
   const startUTC = 1584032400000;//13th march
-  const firstDayUTC = 1579712400000;//23 jan 
+  const firstDayUTC = 1579712400000;//23 jan
   const dayConst = 24 * 3600000;
   const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
   let news = {};
@@ -170,14 +183,14 @@ app.get('/timeline', function(req, res){
   let important_events = {};
   for (var i = currentDay; i >= startDay; i --) { //i number of days since strike (day 1)
     positive.unshift(0);
-    neutral.unshift(0); 
+    neutral.unshift(0);
     negative.unshift(0);
     if (i.toString() in news) {
-      for (var j = 0; j < news[i.toString()].length; j ++) { 
+      for (var j = 0; j < news[i.toString()].length; j ++) {
         positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
         neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
         negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
-        if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) { 
+        if (positive[0] + neutral[0] + negative[0] >= important_event_cutoff) {
           important_events[(data['title'][(news[i.toString()][j]).toString()])] = i;
         }
       }
@@ -191,6 +204,7 @@ app.get('/timeline', function(req, res){
      startDay: startDay,
      firstDayUTC: firstDayUTC,
   });
+}
 })
 })
 
