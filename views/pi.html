@@ -83,6 +83,16 @@
 </body>
 <script>
   const CYCLE_TIME = 5 * 1000; // 10 seconds
+  const ESC_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;',
+    "`": '&grave;'
+  };
+
   let idx = 0;
   function cycleFunc() {
     let xhttp = new XMLHttpRequest();
@@ -94,7 +104,11 @@
         cycleElem.style.animationName = "fadeOut";
         cycleElem.style.animationIterationCount = "1";
         setTimeout(function() {
-          cycleElem.innerHTML = msg.text;
+          let quote = msg.text;
+          for (let c in ESC_MAP) {
+            quote = quote.replace(c, ESC_MAP[c]);
+          }
+          cycleElem.innerHTML = quote;
           idx = (idx + 1) % msg.currlen;
           cycleElem.style.animationName = "fadeIn";
           cycleElem.style.animationIterationCount = "1";
@@ -106,5 +120,5 @@
     setTimeout(cycleFunc, CYCLE_TIME);
   }
 
-  cycleFunc(); 
+cycleFunc(); 
 </script>
