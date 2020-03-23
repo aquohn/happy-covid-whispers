@@ -146,6 +146,20 @@ app.get('/nextquote', function(req, res){
 
 app.post('/postquote', function(req, res){
   let quote = req.body.quote;
+  const ESC_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;',
+    "`": '&grave;'
+  };
+
+  for (let c in ESC_MAP) {
+    quote = quote.replace(c, ESC_MAP[c]);
+  }
+
   buf[writeidx] = quote;
   writeidx = (writeidx + 1) % maxlen;
 
@@ -153,6 +167,7 @@ app.post('/postquote', function(req, res){
   /* quote += " _#Covid_19"; */
   res.sendFile(__dirname + "/views/thankyou.html");
 })
+
 app.get('/timeline', function(req, res){
   request('http://35d97685.ap.ngrok.io/overall', function(err, response, body) {
     if (body.startsWith("Tunnel")) {
