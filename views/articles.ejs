@@ -157,7 +157,7 @@
                 <table>
                   <tr>
                     <td>
-                      <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: <span id = "bPos"><%= data[prev]["breakdown"]["positive"] %><span>%</h1>
+                      <h1 class = "smalltext" style = "color: green"><i class="material-icons">sentiment_very_satisfied</i> Positive: <span id = "bPos"><%= data[prev]["breakdown"]["positive"] %></span>%</h1>
                     </td>
                   </tr>
                     <tr>
@@ -175,7 +175,7 @@
         </div>
         <div display>
           <h3 class = 'title'>Word Cloud</h3>
-          <div id = "wordclouderr" style="width: 1000px; margin: auto;"><span class = "smalltext">Sorry, word cloud is currently unavailable! Please come back later</span></div>
+          <div><img id = "wordcloud" style="height: 180px; width: auto; margin-left: 50px; margin-top: 5px;"></div>
         </div>
   </div>
   <script>
@@ -191,6 +191,7 @@
         breakdownPos.push(<%= data[i]["breakdown"]["positive"] %>)
         breakdownNeg.push(<%= data[i]["breakdown"]["negative"] %>)
         breakdownNeu.push(<%= data[i]["breakdown"]["neutral"] %>)
+        wordcloud.push("http://" + "<%- data[i]["wordcloud"] %>")
       <% } %>
       var div = document.getElementById('0');
      div.classList.add('articleboxclick');
@@ -291,33 +292,19 @@
 
    ]
  }
- var wordcloudConfig = {
-   type: "wordcloud",
-   options: {
-     text: "<%= data[0]['summary'] %>",
-     minLength: 5,
-     maxItems: 10,
-     aspect: "flow-center"
-   }
- }
+  document.getElementById("wordcloud").src = wordcloud[0];
      zingchart.render({
            id : 'sentiment',
            data : overallConfig,
            width: 300,
-           height: 200,
+           height: 180,
      });
      zingchart.render({
            id : 'breakdown',
            data : breakdownConfig,
            width: 200,
-           height: 200,
+           height: 180,
      });
-     zingchart.render({
-  id: 'wordcloud',
-  data: wordcloudConfig,
-  height: 150,
-  width: '100%'
- });
     })();
 
     function test(i) {
@@ -327,9 +314,7 @@
       prev.classList.add('articlebox');
       div.classList.add('articleboxclick');
       curr = i;
-      console.log(breakdownPos[i]);
-      console.log(breakdownNeg[i]);
-      console.log(breakdownNeu[i]);
+      document.getElementById("wordcloud").src = wordcloud[i];
       let overallConfig = {
         type: 'gauge',
         "plotarea":{
@@ -423,13 +408,13 @@
             id : 'sentiment',
             data : overallConfig,
             width: 300,
-            height: 200,
+            height: 180,
       });
       zingchart.render({
             id : 'breakdown',
             data : breakdownConfig,
             width: 200,
-            height: 200,
+            height: 180,
       });
   }
 
