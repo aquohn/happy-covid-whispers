@@ -10,6 +10,8 @@ app.use(partials());
 app.use("/static", express.static("public"));
 app.use(bodyParser.urlencoded({extended : false})); // no complicated post requests
 
+var tunnel = "http://119.74.13.239:5000/";
+
 const port = 80;
 
 const maxlen = 100;
@@ -19,7 +21,7 @@ let buf = ["No messages yet!"];
 let writeidx = 0;
 
 app.get('/covid', function(req, res){
-  request('http://35d97685.ap.ngrok.io/aggregate', function(err, response, body) {
+  request(tunnel + 'aggregate', function(err, response, body) {
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/aggregate.json');
       body =JSON.parse(body);
@@ -54,7 +56,7 @@ app.get('/covid', function(req, res){
 })
 
 app.get('/articles', function( req, res){
-  request("http://35d97685.ap.ngrok.io/overall", function(err, response, body) {
+  request(tunnel + "/overall", function(err, response, body) {
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       body = JSON.parse(body);
@@ -147,7 +149,7 @@ app.get('/nextquote', function(req, res){
 
 app.post('/postquote', function(req, res){
   let quote = req.body.quote;
-  
+
   if (!quote) {
     quote = "";
   }
@@ -160,7 +162,7 @@ app.post('/postquote', function(req, res){
 })
 
 app.get('/timeline', function(req, res){
-  request('http://35d97685.ap.ngrok.io/overall', function(err, response, body) {
+  request(tunnel + '/overall', function(err, response, body) {
     var data;
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
