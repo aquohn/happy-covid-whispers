@@ -20,7 +20,7 @@ const maxlen = 100;
 let buf = ["No messages yet!"];
 let writeidx = 0;
 
-app.get('/covid', function(req, res){
+app.get('/covid19', function(req, res){
   request(tunnel + 'aggregate', function(err, response, body) {
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/aggregate.json');
