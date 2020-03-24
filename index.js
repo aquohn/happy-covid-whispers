@@ -8,7 +8,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(partials());
 app.use("/static", express.static("public"));
-app.use(bodyParser.urlencoded({extended : false})); // no complicated post requests
+app.use(bodyParser.urlencoded({ extended: false })); // no complicated post requests
 
 const port = 80;
 
@@ -18,11 +18,11 @@ const maxlen = 100;
 let buf = ["No messages yet!"];
 let writeidx = 0;
 
-app.get('/covid19', function(req, res){
-  request('http://119.74.13.239:5000/aggregate', function(err, response, body) {
+app.get('/covid19', function (req, res) {
+  request('http://119.74.13.239:5000/aggregate', function (err, response, body) {
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/aggregate.json');
-      body =JSON.parse(body);
+      body = JSON.parse(body);
     } else {
       body = JSON.parse(body);
     }
@@ -32,39 +32,39 @@ app.get('/covid19', function(req, res){
     var manpowerTotal = body["manpower"]["counts"]["negative"] + body["manpower"]["counts"]["neutral"] + body["manpower"]["counts"]["positive"];
     var data = {
       overall: (body["overall"]["sentiment"]).toFixed(1),
-      breakdown: [((body["overall"]["counts"]["positive"]/overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["neutral"]/overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["negative"]/overallTotal) * 100).toFixed(1)], //positive, neutral, negative
+      breakdown: [((body["overall"]["counts"]["positive"] / overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["neutral"] / overallTotal) * 100).toFixed(1), ((body["overall"]["counts"]["negative"] / overallTotal) * 100).toFixed(1)], //positive, neutral, negative
       healthcare: {
         overall: (body["health"]["sentiment"]).toFixed(1),
-        breakdown: [((body["health"]["counts"]["positive"]/healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["neutral"]/healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["negative"]/healthTotal) * 100).toFixed(1)], //positive, neutral, negative
+        breakdown: [((body["health"]["counts"]["positive"] / healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["neutral"] / healthTotal) * 100).toFixed(1), ((body["health"]["counts"]["negative"] / healthTotal) * 100).toFixed(1)], //positive, neutral, negative
       },
       manpower: {
         overall: (body["manpower"]["sentiment"]).toFixed(1),
-        breakdown: [((body["manpower"]["counts"]["positive"]/manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["neutral"]/manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["negative"]/manpowerTotal) * 100).toFixed(1)], //positive, neutral, negative
+        breakdown: [((body["manpower"]["counts"]["positive"] / manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["neutral"] / manpowerTotal) * 100).toFixed(1), ((body["manpower"]["counts"]["negative"] / manpowerTotal) * 100).toFixed(1)], //positive, neutral, negative
       },
       education: {
-        overall: (body["others"]["sentiment"]).toFixed(1),
-        breakdown: [((body["others"]["counts"]["positive"]/othersTotal) * 100).toFixed(1), ((body["others"]["counts"]["neutral"]/othersTotal) * 100).toFixed(1), ((body["others"]["counts"]["negative"]/othersTotal) * 100).toFixed(1)], //positive, neutral, negative
+        overall: (body["education"]["sentiment"]).toFixed(1),
+        breakdown: [((body["education"]["counts"]["positive"] / othersTotal) * 100).toFixed(1), ((body["education"]["counts"]["neutral"] / othersTotal) * 100).toFixed(1), ((body["education"]["counts"]["negative"] / othersTotal) * 100).toFixed(1)], //positive, neutral, negative
       }
     }
     console.log(data);
-    res.render("\index", {
+    res.render("index", {
       data: data
     });
   })
 })
 
-app.get('/articles', function( req, res){
-  request('http://119.74.13.239:5000/overall', function(err, response, body) {
+app.get('/articles', function (req, res) {
+  request('http://119.74.13.239:5000/overall', function (err, response, body) {
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       body = JSON.parse(body);
     } else {
-    var body = JSON.parse(body);
-  }
+      var body = JSON.parse(body);
+    }
     //-----------function for arranging everything------------------------------
     var data = [];
     var c = 0;
-    Object.keys(body["title"]).forEach(function(key) {
+    Object.keys(body["title"]).forEach(function (key) {
       c++;
       var totalCount = body["counts"][key]["positive"] + body["counts"][key]["neutral"] + body["counts"][key]["negative"];
       var d = new Date(body["date"][key]);
@@ -72,16 +72,16 @@ app.get('/articles', function( req, res){
       var datestring = days[d.getDay()] + ", " + d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
       var article = {
         "title": body["title"][key],
-        "date" : datestring,
-        "url" : body["url"][key],
-        "summary" : body["summary"][key],
-        "sentiment" : (body["sentiment"][key]).toFixed(1),
-        "breakdown" : {
-          "positive" : Math.round((body["counts"][key]["positive"]) / totalCount * 100),
-          "neutral" : Math.round((body["counts"][key]["neutral"]) / totalCount * 100),
-          "negative" : Math.round((body["counts"][key]["negative"]) / totalCount * 100),
+        "date": datestring,
+        "url": body["url"][key],
+        "summary": body["summary"][key],
+        "sentiment": (body["sentiment"][key]).toFixed(1),
+        "breakdown": {
+          "positive": Math.round((body["counts"][key]["positive"]) / totalCount * 100),
+          "neutral": Math.round((body["counts"][key]["neutral"]) / totalCount * 100),
+          "negative": Math.round((body["counts"][key]["negative"]) / totalCount * 100),
         },
-        "wordcloud" : (body["comments"][key]).toString()
+        "wordcloud": (body["comments"][key]).toString()
       };
       data.push([body["date"][key], article]);
     })
@@ -92,7 +92,7 @@ app.get('/articles', function( req, res){
     }
     //--------------------------------------------------------------------------
     var prev = 0;
-    res.render("\articles.ejs", {
+    res.render("articles", {
       data: jsonData,
       onclick: "test()",
       prev: prev
@@ -110,23 +110,23 @@ app.get('/articles', function( req, res){
   */
 })
 
-app.get('/aboutUs', function(req, res) {
+app.get('/aboutUs', function (req, res) {
   res.render("\aboutUs.ejs");
 })
 
-app.get('/pi', function(req, res){
+app.get('/pi', function (req, res) {
   res.sendFile(__dirname + "/views/pi.html");
 })
 
-app.get('/ownquote', function(req, res){
+app.get('/ownquote', function (req, res) {
   res.sendFile(__dirname + "/views/ownquote.html");
 })
 
-app.get('/thankyou', function(req, res){
+app.get('/thankyou', function (req, res) {
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 
-app.get('/nextquote', function(req, res){
+app.get('/nextquote', function (req, res) {
   let currlen = buf.length;
   idx = parseInt(req.query.idx);
   if (!idx) { // default for all falsy values
@@ -143,7 +143,7 @@ app.get('/nextquote', function(req, res){
 })
 
 
-app.post('/postquote', function(req, res){
+app.post('/postquote', function (req, res) {
   let quote = req.body.quote;
 
   if (!quote) {
@@ -157,24 +157,24 @@ app.post('/postquote', function(req, res){
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 
-app.get('/timeline', function(req, res){
-  request('http://119.74.13.239:5000/overall', function(err, response, body) {
+app.get('/timeline', function (req, res) {
+  request('http://119.74.13.239:5000/overall', function (err, response, body) {
     var data;
     if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       data = JSON.parse(body);
     } else {
       data = JSON.parse(body);
-  }
-  const important_event_cutoff = 0;
+    }
+    const important_event_cutoff = 0;
     // const startUTC = 1579712400000; //23 jan
-    const startUTC = 1584032400000;//13th march
+    const startUTC = 1584205200000;//15th march
     const firstDayUTC = 1579712400000;//23 jan
     const dayConst = 24 * 3600000;
     const startDay = Math.floor((startUTC - firstDayUTC) / dayConst);
     let news = {};
     for ([post_index, utcx] of Object.entries(data['date'])) {
-      dayNumber = Math.floor((utcx - firstDayUTC) /dayConst).toString()
+      dayNumber = Math.floor((utcx - firstDayUTC) / dayConst).toString()
       if (!(dayNumber in news)) {
         news[dayNumber] = [post_index];
       } else {
@@ -187,12 +187,12 @@ app.get('/timeline', function(req, res){
     let neutral = [];
     let negative = [];
     let important_events = {};
-    for (var i = currentDay; i >= startDay; i --) { //i number of days since strike (day 1)
+    for (var i = currentDay; i >= startDay; i--) { //i number of days since strike (day 1)
       positive.unshift(0);
       neutral.unshift(0);
       negative.unshift(0);
       if (i.toString() in news) {
-        for (var j = 0; j < news[i.toString()].length; j ++) {
+        for (var j = 0; j < news[i.toString()].length; j++) {
           positive[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['positive']);
           neutral[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['neutral']);
           negative[0] += parseInt(data['counts'][(news[i.toString()][j]).toString()]['negative']);
@@ -202,7 +202,7 @@ app.get('/timeline', function(req, res){
         }
       }
     }
-    let sentiments = {'positive':positive, 'neutral':neutral, 'negative':negative};
+    let sentiments = { 'positive': positive, 'neutral': neutral, 'negative': negative };
     res.render("timeline", {
       sentiments: sentiments,
       events: important_events,
