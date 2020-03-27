@@ -46,7 +46,6 @@ app.get('/covid19', function (req, res) {
         breakdown: [((body["education"]["counts"]["positive"] / othersTotal) * 100).toFixed(1), ((body["education"]["counts"]["neutral"] / othersTotal) * 100).toFixed(1), ((body["education"]["counts"]["negative"] / othersTotal) * 100).toFixed(1)], //positive, neutral, negative
       }
     }
-    console.log(data);
     res.render("index", {
       data: data
     });
@@ -54,13 +53,13 @@ app.get('/covid19', function (req, res) {
 })
 
 app.get('/articles', function (req, res) {
-  //request('http://119.74.13.239:5000/overall', function (err, response, body) {
-  //  if (body.startsWith("Tunnel")) {
+  request('http://119.74.13.239:5000/overall', function (err, response, body) {
+   if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       body = JSON.parse(body);
-    /*} else {
+    } else {
       var body = JSON.parse(body);
-    }*/
+    }
     //-----------function for arranging everything------------------------------
     var data = [];
     var c = 0;
@@ -113,7 +112,7 @@ app.get('/articles', function (req, res) {
       onclick: "test()",
       prev: prev
     });
-  //})
+  })
   /*
   let rawdata = fs.readFileSync('./sample.json');
   let data = JSON.parse(rawdata);
