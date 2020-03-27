@@ -54,33 +54,49 @@ app.get('/covid19', function (req, res) {
 })
 
 app.get('/articles', function (req, res) {
-  request('http://119.74.13.239:5000/overall', function (err, response, body) {
-    if (body.startsWith("Tunnel")) {
+  //request('http://119.74.13.239:5000/overall', function (err, response, body) {
+  //  if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       body = JSON.parse(body);
-    } else {
+    /*} else {
       var body = JSON.parse(body);
-    }
+    }*/
     //-----------function for arranging everything------------------------------
     var data = [];
     var c = 0;
     Object.keys(body["title"]).forEach(function (key) {
-      c++;
       var totalCount = body["counts"][key]["positive"] + body["counts"][key]["neutral"] + body["counts"][key]["negative"];
       var d = new Date(body["date"][key]);
       var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      var keep = false;
+      var numLikes = body["reactions"][key]["Like"];
+      Object.keys(body["reactions"][key]).forEach(function (r) {
+        if (r!= "Like") {
+          if ((body["reactions"][key][r] / numLikes) >= 0.05) {
+            keep = true;
+          }
+        }
+      });
+      if (!keep) {
+        totalCount += numLikes;
+        body["counts"][key]["neutral"] += numLikes;
+      }
+      var sentiment = keep ? (body["sentiment"][key]).toFixed(1) : '0.0';
+      var t = body["title"][key].replace(/\+/g, "'");
+      var summary = body["summary"][key].replace(/\+/g, "'");
       var datestring = days[d.getDay()] + ", " + d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
       var article = {
-        "title": body["title"][key],
+        "title": t,
         "date": datestring,
         "url": body["url"][key],
-        "summary": body["summary"][key],
-        "sentiment": (body["sentiment"][key]).toFixed(1),
+        "summary": summary,
+        "sentiment": sentiment,
         "breakdown": {
           "positive": Math.round((body["counts"][key]["positive"]) / totalCount * 100),
           "neutral": Math.round((body["counts"][key]["neutral"]) / totalCount * 100),
           "negative": Math.round((body["counts"][key]["negative"]) / totalCount * 100),
         },
+        "category" : body["category"][key],
         "wordcloud": (body["comments"][key]).toString()
       };
       data.push([body["date"][key], article]);
@@ -97,7 +113,7 @@ app.get('/articles', function (req, res) {
       onclick: "test()",
       prev: prev
     });
-  })
+  //})
   /*
   let rawdata = fs.readFileSync('./sample.json');
   let data = JSON.parse(rawdata);

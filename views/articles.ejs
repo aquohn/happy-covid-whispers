@@ -9,6 +9,9 @@
       overflow: auto;
       float: left;
     }
+    #articlebar {
+      margin-top: 30px;
+    }
     .title, .date {
       font-family: 'Open Sans', sans-serif;
       font-weight: 400;
@@ -94,13 +97,34 @@
       max-height: 80px;
       overflow: auto;
     }
+    #option{
+      margin-left: 20px;
+      left: 20px;
+    }
+    #optionBtn, label {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 20px;
+      display: inline-block;
+      margin-bottom: 10;
+      margin-top: 0px;
+    }
   </style>
 </head>
 <body>
   <%- include ('./partials/header') %>
+
+    <div id = 'option'>
+      <p id = "optionBtn">Choose Which Articles to Show:</p>
+      <input type = "radio" name = "opt" onchange="articlesOption('all')" id = "allCb" checked><label>All Articles</label>
+      <input type = "radio" name = "opt" onchange="articlesOption('health')" id = "hCb"><label>Healthcare Articles</label>
+      <input type = "radio" name = "opt" onchange="articlesOption('man')" id = "manCb"><label>Manpower Articles</label>
+      <input type = "radio" name = "opt" onchange="articlesOption('ed')" id = "edCb"><label>Education Articles</label>
+      <input type = "radio"name = "opt"  onchange="articlesOption('other')" id = "otherCb"><label>Other Articles</label>
+    </div>
   <div id = 'sidebar'>
+    <div id = 'articlebar'>
   <% for (var i = 0; i < Object.keys(data).length; i++){ %>
-    <div class = 'articlebox' id = '<%= i %>' onclick='(function onclick() {
+    <div class = 'articlebox <%= data[i]["category"] %>' id = '<%= i %>' onclick='(function onclick() {
       document.getElementById("maintitle").innerHTML ="<%= data[i]["title"] %>";
       document.getElementById("source").innerHTML ="<%= data[i]["url"] %>";
       document.getElementById("date").innerHTML ="<%= data[i]["date"] %>";
@@ -118,6 +142,7 @@
     </div>
   <% } %>
   </div>
+</div>
   <div id = 'main'>
     <h1 class = 'title' id = 'maintitle'><%= data[prev]['title'] %></h1>
     <h4 class = 'link'><span id = 'date'><%= data[prev]['date'] %></span>, Source: <a id = "link" href = '<%= data[prev]['url'] %>' target ='_blank'><span  id = 'source'> <%= data[prev]['url'] %></span></a></h4>
@@ -179,6 +204,54 @@
         </div>
   </div>
   <script>
+    function articlesOption(name) {
+      if (name == 'health') {
+        var h = document.getElementsByClassName("articlebox");
+        for (var i = 0; i < h.length; i++) {
+          h[i].style.display = "none";
+        }
+        var d = document.getElementsByClassName("articlebox health");
+        for (var i = 0; i < d.length; i++) {
+          d[i].style.display = "block";
+        }
+      }
+      if (name == 'man') {
+        var h = document.getElementsByClassName("articlebox");
+        for (var i = 0; i < h.length; i++) {
+          h[i].style.display = "none";
+        }
+        var d = document.getElementsByClassName("articlebox manpower");
+        for (var i = 0; i < d.length; i++) {
+          d[i].style.display = "block";
+        }
+      }
+      if (name == 'ed') {
+        var h = document.getElementsByClassName("articlebox");
+        for (var i = 0; i < h.length; i++) {
+          h[i].style.display = "none";
+        }
+        var d = document.getElementsByClassName("articlebox education");
+        for (var i = 0; i < d.length; i++) {
+          d[i].style.display = "block";
+        }
+      }
+      if (name == 'other') {
+        var h = document.getElementsByClassName("articlebox");
+        for (var i = 0; i < h.length; i++) {
+          h[i].style.display = "none";
+        }
+        var d = document.getElementsByClassName("articlebox others");
+        for (var i = 0; i < d.length; i++) {
+          d[i].style.display = "block";
+        }
+      }
+      if (name == 'all') {
+        var h = document.getElementsByClassName("articlebox");
+        for (var i = 0; i < h.length; i++) {
+          h[i].style.display = "block";
+        }
+      }
+    }
     var curr = 0;
     var sentiments = [];
     var breakdownPos = [];
@@ -186,6 +259,11 @@
     var breakdownNeu = [];
     var wordcloud = [];
     (function(){
+      document.getElementById("allCb").checked = true;
+      document.getElementById("manCb").checked = false;
+      document.getElementById("edCb").checked = false;
+      document.getElementById("hCb").checked = false;
+      document.getElementById("otherCb").checked = false;
       <% for (var i = 0; i < Object.keys(data).length; i++){ %>
         sentiments.push(<%= data[i]["sentiment"] %>);
         breakdownPos.push(<%= data[i]["breakdown"]["positive"] %>)

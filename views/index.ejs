@@ -20,6 +20,7 @@
       font-size: 4em;
       display: inline;
       margin: 0px;
+      padding-right: 30px;
     }
     .chart{
       display: inline-block;
@@ -41,8 +42,6 @@
     }
     .desc {
       font-family: "Open Sans", sans-serif;
-    }
-    td {
     }
   </style>
 </head>
@@ -122,7 +121,7 @@
               </tr>
               <tr>
                 <td colspan="2">
-                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: orange">monetization_on</i> Manpower </h1>
+                    <h1 class = "label" style="font-weight: bold"><i class="material-icons" style="color: blue">people</i> Manpower </h1>
                 </td>
               </tr>
               <tr>
@@ -162,11 +161,9 @@
     .then(data => {
       var dates = [];
       var lastFiveDays = [];
-      var i = data["Singapore"].length - 1;
-      while (data["Singapore"][i]["date"] != '2020-3-17') {
+      for (var i = data["Singapore"].length - 1; i > data["Singapore"].length - 6; i--) {
         lastFiveDays.push(data["Singapore"][i]["confirmed"]);
         dates.push(data["Singapore"][i]["date"]);
-        i--;
       }
       lastFiveDays.reverse();
       dates.reverse();
@@ -205,7 +202,7 @@
    {
      type: 'bar',
      text: 'Sentiment',
-     values: [-0.2, -0.3, -0.8, -0.4, -0.4],
+     values: [-0.4, -0.3, -0.5, -0.4, <%= data.overall %>],
      backgroundColor: '#ffa726',
      scales: 'scale-x, scale-y-2',
      "bar-width": "50"

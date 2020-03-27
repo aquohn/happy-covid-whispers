@@ -27,7 +27,7 @@
     background-color: white;
     border-radius: 3px;
     box-shadow: 0 .5rem 1rem;
-    font-size: 1.2vw; 
+    font-size: 1.2vw;
     margin: 3vh;
     padding: 5px;
     box-shadow: 0px 3px 5px 2px #888888;
@@ -66,19 +66,20 @@
           <h2 style="font-size: 2vw; font-family: Open Sans, sans-serif;
           font-weight: 400;margin-left: 5%;">Headlines</h2>
            <h2 style="text-align: center; max-height: 60vh; overflow: auto;">
-            <div" id="'important_events'"></div>
+            <div id="'important_events'"></div>
             </h2></td>
     </tr>
-  </table> 
+  </table>
   </div>
   <script>
     const startUTC = <%=startUTC%>;
     function formatString(str) {
     num = 150;
+    str = str.replace(/\+/g, "'");
     if (str.length <= num) {
-      return str.replace("+","'");
+      return str;
     }
-    return str.replace("+","'").slice(0, num) + '...';
+    return str.slice(0, num) + '...';
     }
     fetch("https://pomber.github.io/covid19/timeseries.json").then(response => response.json())
     .then(data => {
@@ -108,7 +109,7 @@
         var ie = document.getElementById("'important_events'");
         ie.appendChild(button);
     }
-    var plotConfig = 
+    var plotConfig =
             {
                 "type": "mixed",
                 "utc": true,
@@ -245,7 +246,7 @@
                           "size":6,
                           "background-color": "#007790",
                         }
-                    },  
+                    },
                     {
                         "values": [
                                     <% sentiments["negative"].forEach(element => { %>
@@ -340,11 +341,11 @@
                     },
                 ]
             };
-    zingchart.render({ 
-    	id : 'time_sentiment_cases_plot', 
-    	data : plotConfig, 
-    	height: '100%', 
-    	width: '100%' 
+    zingchart.render({
+    	id : 'time_sentiment_cases_plot',
+    	data : plotConfig,
+    	height: '100%',
+    	width: '100%'
     });
     })
   </script>
