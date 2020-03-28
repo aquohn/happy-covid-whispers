@@ -7,19 +7,16 @@ body {
   margin-top: 10vh;
 }
   #prompt {
-    box-shadow: 0px 3px 5px 2px #888888;
-    width: 75%;
     margin: 0 auto;
     text-align: center;
     font-family: "Open Sans", sans-serif;
-    padding: 2vh 0;
   }
   #prompt h1 {
     padding: 0 3vw;
   }
   #promptform {
     width: 100%;
-    padding: 0vh 0vw 3vh 0vw;
+    margin: 0vh 0vw 1vh 0vw;
   }
   #promptform textarea {
     width: 90%;
@@ -44,7 +41,8 @@ body {
     <h1>Write your own encouraging quote here!</h1>
     <form id="promptform" action="/postquote" method=post>
       <textarea name="quote" maxlength=270></textarea><br />
-      <!-- <div style="padding-top:1vh;font-size:small">All posts automatically tagged <a href="https://twitter.com/hashtag/Covid_19">#Covid_19</a></div> !-->
+      <div style="padding-top:1vh;font-size:small">All posts automatically tagged <a href="https://twitter.com/hashtag/Covid_19">#Covid_19</a> and posted on 
+        <a href="https://twitter.com/sevenbeets">our Twitter account</a>.</div>
       <br /><input type="submit" value="Post!"><br />
     </form>
   </div>

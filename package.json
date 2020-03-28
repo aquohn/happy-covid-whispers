@@ -20,6 +20,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-partials": "^0.3.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "twit": "^2.2.11"
   }
 }

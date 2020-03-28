@@ -1,4 +1,5 @@
 const express = require("express");
+const twit = require("twit");
 const request = require("request");
 const fs = require("fs");
 const bodyParser = require("body-parser");
@@ -14,6 +15,16 @@ const port = 80;
 
 const maxlen = 100;
 // const update_interval = 5 * 60 * 1000; // pull from Twitter every 5 minutes
+
+// @sevenbeets
+var tw_acc = new twit({
+  access_token:         '1239585302059962368-KOIsIf4c9ItIJgF9xovcbn3itKucpG',
+  access_token_secret:      'IM921QQZHPRBJLEOuEtxu9dpI0OPnjHbT7CDj1RoSJ59Z',
+  consumer_key:         'Ne3ChNlM0kp1lX7pYlswy1duO',
+  consumer_secret:  '5sZJn966AoZ7Uyk20rW75oY9GoUqYH6jdX7BPAzLrPND6HicAZ',
+  timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
+  strictSSL:            false,     
+})
 
 let buf = ["No messages yet!"];
 let writeidx = 0;
@@ -167,8 +178,12 @@ app.post('/postquote', function (req, res) {
   buf[writeidx] = quote;
   writeidx = (writeidx + 1) % maxlen;
 
-  /* Code for Twitter version */
-  /* quote += " _#Covid_19"; */
+  /* Code for Twitter */
+  if (quote) {
+    tw_acc.post('statuses/update', { status: quote + " #Covid_19" }, function(err, data, response) {
+      console.log(data)
+    })
+  }
   res.sendFile(__dirname + "/views/thankyou.html");
 })
 
