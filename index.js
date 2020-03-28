@@ -19,13 +19,13 @@ let buf = ["No messages yet!"];
 let writeidx = 0;
 
 app.get('/covid19', function (req, res) {
-  request('http://119.74.13.239:5000/aggregate', function (err, response, body) {
-    if (body.startsWith("Tunnel")) {
+  //request('http://119.74.13.239:5000/aggregate', function (err, response, body) {
+    //if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/aggregate.json');
       body = JSON.parse(body);
-    } else {
+    /*} else {
       body = JSON.parse(body);
-    }
+    }*/
     var overallTotal = body["overall"]["counts"]["negative"] + body["overall"]["counts"]["neutral"] + body["overall"]["counts"]["positive"];
     var healthTotal = body["health"]["counts"]["negative"] + body["health"]["counts"]["neutral"] + body["health"]["counts"]["positive"];
     var othersTotal = body["others"]["counts"]["negative"] + body["others"]["counts"]["neutral"] + body["others"]["counts"]["positive"];
@@ -49,17 +49,17 @@ app.get('/covid19', function (req, res) {
     res.render("index", {
       data: data
     });
-  })
+  //})
 })
 
 app.get('/articles', function (req, res) {
-  request('http://119.74.13.239:5000/overall', function (err, response, body) {
-   if (body.startsWith("Tunnel")) {
+  /*request('http://119.74.13.239:5000/overall', function (err, response, body) {
+   if (body.startsWith("Tunnel")) {*/
       body = fs.readFileSync('./data/proc_data.json');
       body = JSON.parse(body);
-    } else {
+    /*} else {
       var body = JSON.parse(body);
-    }
+    }*/
     //-----------function for arranging everything------------------------------
     var data = [];
     var c = 0;
@@ -112,7 +112,7 @@ app.get('/articles', function (req, res) {
       onclick: "test()",
       prev: prev
     });
-  })
+  //})
   /*
   let rawdata = fs.readFileSync('./sample.json');
   let data = JSON.parse(rawdata);
@@ -173,14 +173,14 @@ app.post('/postquote', function (req, res) {
 })
 
 app.get('/timeline', function (req, res) {
-  request('http://119.74.13.239:5000/overall', function (err, response, body) {
+  //request('http://119.74.13.239:5000/overall', function (err, response, body) {
     var data;
-    if (body.startsWith("Tunnel")) {
+    //if (body.startsWith("Tunnel")) {
       body = fs.readFileSync('./data/proc_data.json');
       data = JSON.parse(body);
-    } else {
+    /*} else {
       data = JSON.parse(body);
-    }
+    }*/
     const important_event_cutoff = 0;
     // const startUTC = 1579712400000; //23 jan
     const startUTC = 1584205200000;//15th march
@@ -225,7 +225,7 @@ app.get('/timeline', function (req, res) {
       startDay: startDay,
       firstDayUTC: firstDayUTC,
     });
-  })
+  //})
 })
 
 
