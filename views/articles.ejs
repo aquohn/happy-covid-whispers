@@ -269,7 +269,7 @@
         breakdownPos.push(<%= data[i]["breakdown"]["positive"] %>)
         breakdownNeg.push(<%= data[i]["breakdown"]["negative"] %>)
         breakdownNeu.push(<%= data[i]["breakdown"]["neutral"] %>)
-        wordcloud.push("http://" + "<%- data[i]["wordcloud"] %>")
+        wordcloud.push("http://localhost/static/images<%- data[i]["wordcloud"] %>.png")
       <% } %>
       var div = document.getElementById('0');
      div.classList.add('articleboxclick');
